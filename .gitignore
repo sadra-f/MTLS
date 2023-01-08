@@ -1,2 +1,6 @@
-/venv
+venv/
 test.py
+de.unihd.dbs.heideltime.standalone.jar
+TreeTagger/
+input.txt
+output.txt
