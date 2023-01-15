@@ -20,7 +20,8 @@ LANGUAGES = {
 	'french':heideltime_resources.Language.FRENCH,
 	'chinese':heideltime_resources.Language.CHINESE,
 	'russian':heideltime_resources.Language.RUSSIAN,
-	'portuguese':heideltime_resources.Language.PORTUGUESE
+	'portuguese':heideltime_resources.Language.PORTUGUESE,
+	'farsi':heideltime_resources.Language.AUTO_PERSIAN
 }
 
 DOCUMENTS = {
