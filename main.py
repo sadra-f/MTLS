@@ -13,7 +13,9 @@ OUTPUT_PATH_4 = 'IO/output_km.txt'
 
 
 def ht(input, reformat:bool=True):
-
+    '''
+        transforms a text or a list of text into a time tagged version of it
+    '''
     hw = HTW('english', reformat_output=reformat)
     res_list = []
     if type(input) == list:
@@ -27,7 +29,9 @@ def ht(input, reformat:bool=True):
 
 
 def sb(inp_sentences:list):
-
+    '''
+        transforms a list of string into a vector representation with sentenceBert
+    '''
     model = SentenceTransformer('all-MiniLM-L6-v2')
 
     embeddings = model.encode(inp_sentences)
@@ -38,7 +42,10 @@ def sb(inp_sentences:list):
 def kmeans(vectorized_sentences, n_clusters):
     return KMeans(n_clusters, n_init=80).fit(vectorized_sentences)
 
-def clusterd_inp_sentences(inp_sentence_list, kmeans_model:KMeans):
+def clusterd_inp_list(inp_sentence_list, kmeans_model:KMeans):
+    '''
+        reformats the initial input list of strings placing strings in the same cluster into the same row in a 2d list
+    '''
     clustered_sentences = []
     for ci in range(kmeans_model.n_clusters):
         clustered_sentences.append([])
@@ -59,11 +66,11 @@ def main():
 
     KM_model = kmeans(sb_res, 5)
     
-    clustered_sentences = clusterd_inp_sentences(inp_list, KM_model)
+    clustered_sentences = clusterd_inp_list(inp_list, KM_model)
     
     tfidf_per_cluster = []
     for i in range(len(clustered_sentences)):
-        #tfidf run on one cluster on each iteration
+        #run tfidf on one cluster on each iteration
         tfidf = skt.TfidfVectorizer(input='content', smooth_idf=True, norm=None)#norm='l2' is better
         tfidf_vector = tfidf.fit_transform(clustered_sentences[i])
         tfidf_per_cluster.append(tfidf_vector)
