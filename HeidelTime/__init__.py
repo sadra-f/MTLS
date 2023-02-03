@@ -20,8 +20,7 @@ LANGUAGES = {
 	'french':heideltime_resources.Language.FRENCH,
 	'chinese':heideltime_resources.Language.CHINESE,
 	'russian':heideltime_resources.Language.RUSSIAN,
-	'portuguese':heideltime_resources.Language.PORTUGUESE,
-	'farsi':heideltime_resources.Language.AUTO_PERSIAN
+	'portuguese':heideltime_resources.Language.PORTUGUESE
 }
 
 DOCUMENTS = {
@@ -58,7 +57,7 @@ class HTW():
 	def convert_date(slef, day, month, year):
 		sdf = jpype.java.text.SimpleDateFormat('dd-M-yyyy hh:mm:ss')
 		str_date = str(day)+'-'+str(month)+'-'+str(year)+' 00:00:00'
-		return sdf.parse(str_date)
+		return sdf.parse(str_date) 
 
 	def parse(self, text, date_ref=None):
 		if (date_ref is None):
