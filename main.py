@@ -3,13 +3,14 @@ from HeidelTime import HTW
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction import text as skt
 import numpy as np
-
+import pandas as pd
 
 INPUT_PATH = 'IO/input.txt'
 OUTPUT_PATH_1 = 'IO/output.txt'
 OUTPUT_PATH_2 = 'IO/output_HT.txt'
 OUTPUT_PATH_3 = 'IO/output_SB.txt'
 OUTPUT_PATH_4 = 'IO/output_km.txt'
+OUTPUT_PATH_5 = 'IO/output_Dataframe.html'
 
 N_CLUSTERS = 5
 
@@ -55,6 +56,27 @@ def clusterd_inp_list(inp_sentence_list, kmeans_model:KMeans):
     
     return clustered_sentences
 
+def clusterd_inp_sentences(inp_sentence_list, kmeans_model:KMeans):
+    clustered_inp_list = []
+    for ci in range(kmeans_model.n_clusters):
+        clustered_inp_list.append([])
+        for inpi in np.where(kmeans_model.labels_ == ci)[0]:
+            clustered_inp_list[ci].append(inp_sentence_list[inpi])
+    return clustered_inp_list
+
+def tfidf(doc):
+    # runs tfdif on a list of strings (a document)
+    tfidf = skt.TfidfVectorizer(input='content', smooth_idf=True, norm='l2')
+    return (tfidf.fit_transform(doc), tfidf.get_feature_names_out())
+
+def tfidf_list(doc_list):
+    #runs tfidf on a list of list of strings (multiple documents)
+    res_list = []
+    for i in range(len(doc_list)):
+        res_list.append(tfidf(doc_list[i]))
+
+    return res_list
+
 
 def main():
     inp = open(INPUT_PATH)
@@ -69,15 +91,14 @@ def main():
     
     clustered_sentences = clusterd_inp_list(inp_list, KM_model)
     
-    tfidf_per_cluster = []
-    for i in range(len(clustered_sentences)):
-        #run tfidf on one cluster on each iteration
-        tfidf = skt.TfidfVectorizer(input='content', smooth_idf=True, norm=None)#norm='l2' is better
-        tfidf_vector = tfidf.fit_transform(clustered_sentences[i])
-        tfidf_per_cluster.append(tfidf_vector)
+    clustered_sentences = clusterd_inp_sentences(inp_list, KM_model)
+    
+    cluster_tfidf_vector_list = tfidf_list(clustered_sentences)
+    
+    
 
 
-def print_seperated_file(inp_list, ht_res=None, sb_res=None, cluster_res=None):
+def print_seperated_file(inp_list, ht_res=None, sb_res=None, cluster_res=None, kmeans_labels=None, tfidf_vector_list=None):
     with open(OUTPUT_PATH_1, 'w') as opf:
         for i in range(len(inp_list)):
             print("### ORIGINAL", file=opf)
@@ -94,7 +115,12 @@ def print_seperated_file(inp_list, ht_res=None, sb_res=None, cluster_res=None):
             if cluster_res is not None:
                 print(f'### Cluster Number ==> #{cluster_res[i]}', file=opf)
             print('=================================================================', file=opf)
-
+    if tfidf_vector_list is not None and kmeans_labels is not None:
+        with open(OUTPUT_PATH_5, 'w') as opf:
+            for i in range(len(tfidf_vector_list)):
+                tfidf_df = pd.DataFrame(tfidf_vector_list[i][0].toarray(), index=np.where(kmeans_labels == i)[0], 
+                columns=tfidf_vector_list[i][1])
+                print(tfidf_df.style.render(), file=opf)
 
 if __name__ == '__main__':
     main()
