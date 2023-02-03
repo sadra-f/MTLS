@@ -11,6 +11,7 @@ OUTPUT_PATH_2 = 'IO/output_HT.txt'
 OUTPUT_PATH_3 = 'IO/output_SB.txt'
 OUTPUT_PATH_4 = 'IO/output_km.txt'
 
+N_CLUSTERS = 5
 
 def ht(input, reformat:bool=True):
     '''
@@ -64,7 +65,7 @@ def main():
 
     sb_res = sb(inp_list)
 
-    KM_model = kmeans(sb_res, 5)
+    KM_model = kmeans(sb_res, N_CLUSTERS)
     
     clustered_sentences = clusterd_inp_list(inp_list, KM_model)
     
