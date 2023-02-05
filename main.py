@@ -78,6 +78,18 @@ def tfidf_list(doc_list):
     return res_list
 
 
+
+def cluster_main_words(tfidf_vector_list, km_labels):
+    result = []
+    for i in range(len(tfidf_vector_list)):
+        tmp = pd.DataFrame(tfidf_vector_list[i][0].toarray(), index=np.where(km_labels == i)[0], columns=tfidf_vector_list[i][1])
+        tmp = tmp.sum(axis=0).sort_values(ascending=False)
+        result.append([])
+        for j in range(3):
+            result[i].append(tmp.index[j])
+    
+    return result
+
 def main():
     inp = open(INPUT_PATH)
     inp_list = []
