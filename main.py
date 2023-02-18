@@ -4,13 +4,7 @@ from sklearn.cluster import KMeans
 from sklearn.feature_extraction import text as skt
 import numpy as np
 import pandas as pd
-
-INPUT_PATH = 'IO/input.txt'
-OUTPUT_PATH_1 = 'IO/output.txt'
-OUTPUT_PATH_2 = 'IO/output_HT.txt'
-OUTPUT_PATH_3 = 'IO/output_SB.txt'
-OUTPUT_PATH_4 = 'IO/output_km.txt'
-OUTPUT_PATH_5 = 'IO/output_Dataframe.html'
+from statics.paths import *
 
 N_CLUSTERS = 5
 
