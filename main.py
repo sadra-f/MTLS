@@ -88,7 +88,7 @@ def main():
     inp = open(INPUT_PATH)
     inp_list = []
     for line in inp:
-        inp_list.append(line)
+        inp_list.append(line.lower())
     inp.close()
 
     sb_res = sb(inp_list)
