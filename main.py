@@ -79,7 +79,9 @@ def cluster_main_words(tfidf_vector_list, km_labels):
         tmp = pd.DataFrame(tfidf_vector_list[i][0].toarray(), index=np.where(km_labels == i)[0], columns=tfidf_vector_list[i][1])
         tmp = tmp.sum(axis=0).sort_values(ascending=False)
         result.append([])
-        for j in range(3):
+        #to plot the data accodingly
+        #tmp.plot(kind='bar')
+        for j in range(3):#pick the main 3 words in the list
             result[i].append(tmp.index[j])
     
     return result
@@ -101,9 +103,6 @@ def main():
     
     cluster_tfidf_vector_list = tfidf_list(clustered_sentences)
     
-    
-
-
 def print_seperated_file(inp_list, ht_res=None, sb_res=None, cluster_res=None, kmeans_labels=None, tfidf_vector_list=None):
     with open(OUTPUT_PATH_1, 'w') as opf:
         for i in range(len(inp_list)):

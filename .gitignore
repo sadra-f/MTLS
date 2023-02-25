@@ -3,3 +3,4 @@ test.py
 IO/
 __pycache__/
 todo.txt
+.vscode/
