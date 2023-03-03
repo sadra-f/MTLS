@@ -1,6 +1,6 @@
 venv/
 test.py
-IO/
+test_io/
 __pycache__/
 todo.txt
 .vscode/
