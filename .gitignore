@@ -4,3 +4,4 @@ test_io/
 __pycache__/
 todo.txt
 .vscode/
+clustering/deepDPM/
