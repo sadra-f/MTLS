@@ -7,7 +7,7 @@ def kmeans(vectorized_sentences, n_clusters):
     return KMeans(n_clusters, n_init=80).fit(vectorized_sentences)
 
 
-def clusterd_inp_list(inp_sentence_list, kmeans_model:KMeans):
+def cluster_inp_list(inp_sentence_list, kmeans_model:KMeans):
     '''
         reformats the initial input list of strings placing strings which are in the 
         same cluster into the same row in a 2d list
