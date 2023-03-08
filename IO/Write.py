@@ -1,5 +1,7 @@
 from statics.paths import *
 import pandas as pd
+import numpy as np
+
 
 def print_seperated_file(inp_list, ht_res=None, sb_res=None, cluster_res=None, kmeans_labels=None, tfidf_vector_list=None):
     with open(OUTPUT_PATH_1, 'w') as opf:

@@ -1,4 +1,4 @@
-from HeidelTime import HTW
+from TimeTagger import HTW
 
 def ht(input, reformat:bool=True):
     '''
