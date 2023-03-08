@@ -5,26 +5,10 @@ from sklearn.feature_extraction import text as skt
 import numpy as np
 import pandas as pd
 from statics.paths import *
-from clustering.KMeans_clustering import my_kmeans, clusterd_inp_sentences, clusterd_inp_list
+from statics.config import *
+from clustering.KMeans_clustering import kmeans, clusterd_inp_sentences, clusterd_inp_list
+from IO.Write import print_seperated_file
 
-
-
-N_CLUSTERS = 5
-
-def ht(input, reformat:bool=True):
-    '''
-        transforms a text or a list of text into a time tagged version of it
-    '''
-    hw = HTW('english', reformat_output=reformat)
-    res_list = []
-    if type(input) == list:
-        for string in input:
-            res_list.append(hw.parse(string))
-        return res_list
-    elif type(input) == str:
-        return hw.parse(input)
-    else:
-        raise TypeError
 
 
 def sb(inp_sentences:list):
@@ -53,19 +37,6 @@ def tfidf_list(doc_list):
 
 
 
-def cluster_main_words(tfidf_vector_list, km_labels):
-    result = []
-    for i in range(len(tfidf_vector_list)):
-        tmp = pd.DataFrame(tfidf_vector_list[i][0].toarray(), index=np.where(km_labels == i)[0], columns=tfidf_vector_list[i][1])
-        tmp = tmp.sum(axis=0).sort_values(ascending=False)
-        result.append([])
-        #to plot the data accodingly
-        #tmp.plot(kind='bar')
-        for j in range(3):#pick the main 3 words in the list
-            result[i].append(tmp.index[j])
-    
-    return result
-
 def main():
     inp = open(INPUT_PATH)
     inp_list = []
@@ -83,29 +54,7 @@ def main():
     
     cluster_tfidf_vector_list = tfidf_list(clustered_sentences)
     
-def print_seperated_file(inp_list, ht_res=None, sb_res=None, cluster_res=None, kmeans_labels=None, tfidf_vector_list=None):
-    with open(OUTPUT_PATH_1, 'w') as opf:
-        for i in range(len(inp_list)):
-            print("### ORIGINAL", file=opf)
-            print(inp_list[i], file=opf)
-            if ht_res is not None:
-                print("### HeidelTime", file=opf)
-                print(ht_res[i], file=opf)
-            if sb_res is not None:
-                print("### SentenceBert", file=opf)
-                print('[ ', file=opf, end='')
-                for j in range(len(sb_res[i])):
-                    print(sb_res[i][j], file=opf, end=' ')
-                print(']', file=opf)
-            if cluster_res is not None:
-                print(f'### Cluster Number ==> #{cluster_res[i]}', file=opf)
-            print('=================================================================', file=opf)
-    if tfidf_vector_list is not None and kmeans_labels is not None:
-        with open(OUTPUT_PATH_5, 'w') as opf:
-            for i in range(len(tfidf_vector_list)):
-                tfidf_df = pd.DataFrame(tfidf_vector_list[i][0].toarray(), index=np.where(kmeans_labels == i)[0], 
-                columns=tfidf_vector_list[i][1])
-                print(tfidf_df.style.render(), file=opf)
+
 
 if __name__ == '__main__':
     main()
