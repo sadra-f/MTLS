@@ -2,7 +2,7 @@ import jpype
 
 # start the JVM
 if not jpype.isJVMStarted() :
-	jar = "HeidelTime/de.unihd.dbs.heideltime.standalone.jar"
+	jar = "TimeTagger/de.unihd.dbs.heideltime.standalone.jar"
 	jpype.startJVM(jpype.getDefaultJVMPath(), "-ea", "-Djava.class.path=%s" % jar)
 
 # get the Java classes we want to use
