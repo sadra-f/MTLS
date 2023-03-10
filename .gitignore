@@ -1,5 +1,5 @@
 venv/
-test.py
+test*.py
 test_io/
 __pycache__/
 todo.txt

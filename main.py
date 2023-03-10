@@ -24,6 +24,7 @@ def main():
     
     cluster_tfidf_vector_list = tfidf_list(clustered_sentences)
     
+    print(clustered_sentences)
 
 
 if __name__ == '__main__':
