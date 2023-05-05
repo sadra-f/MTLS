@@ -9,6 +9,9 @@ from keybert import KeyBERT
 from statics.stop_words import STOP_WORDS
 import torch
 from IO.Read import DocumentReader
+from pathlib import Path
+from clustering.testdbscan import dbsacn
+from scipy.spatial.distance import euclidean
 
 def keyword_extractor(doc:str):
     model = KeyBERT()
@@ -27,7 +30,7 @@ def doc_list_keyword_extractor(doc_list:list) -> list[str]:
     return res
 
 def main():
-    doc_list = DocumentReader(INPUT_PATH).read_all()
+    doc_list = DocumentReader(INPUT_PATH, parent_as_date=False).read_all()
 
     sb_res = sb([doc.text for doc in doc_list])
 
