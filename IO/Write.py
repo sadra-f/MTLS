@@ -4,7 +4,7 @@ import numpy as np
 
 
 def print_seperated_file(inp_list, ht_res=None, sb_res=None, cluster_res=None, kmeans_labels=None, tfidf_vector_list=None):
-    with open(OUTPUT_PATH_1, 'w') as opf:
+    with open(STR_OUTPUT_PATH, 'w') as opf:
         for i in range(len(inp_list)):
             print("### ORIGINAL", file=opf)
             print(inp_list[i], file=opf)
@@ -22,7 +22,7 @@ def print_seperated_file(inp_list, ht_res=None, sb_res=None, cluster_res=None, k
             print('=================================================================', file=opf)
     
     if tfidf_vector_list is not None and kmeans_labels is not None:
-        with open(OUTPUT_PATH_5, 'w') as opf:
+        with open(STR_OUTPUT_PATH_DF, 'w') as opf:
             for i in range(len(tfidf_vector_list)):
                 tfidf_df = pd.DataFrame(tfidf_vector_list[i][0].toarray(), index=np.where(kmeans_labels == i)[0], 
                 columns=tfidf_vector_list[i][1])

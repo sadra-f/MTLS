@@ -1,6 +1,6 @@
 from datetime import date as Date
 from pathlib import Path
-from ..models.Document import Document
+from models.Document import Document
 
 class DocumentReader:
     def __init__(self, path:Path, file_pattern:str="*.txt", parent_as_date:bool=True, recursive:bool=True, to_lower:bool=True):
@@ -35,13 +35,13 @@ class DocumentReader:
         if path.is_file():
             with open(path) as file:
                 parent_dir_name = path.parent.name
-                return Document(file.read(), Date.fromisoformat(parent_dir_name) if parent_as_date else Date.today(), path, self.to_lower)
+                return Document([line for line in file], Date.fromisoformat(parent_dir_name) if parent_as_date else Date.today(), path, self.to_lower)
             
-    def read_all(self) -> list[Document] | Document:
+    def read_all(self) -> list[Document]:
+        result = []
         if self._is_file:
-            return self._read_file(self.file_path_list[0], self.parent_as_date)
+            result.append(self._read_file(self.file_path_list[0], self.parent_as_date))
         else:
-            result = []
             for path in self.file_path_list:
                 result.append(self._read_file(path, self.parent_as_date))
-            return result
+        return result
