@@ -2,7 +2,7 @@ from datetime import date as Date
 from pathlib import Path
 
 class Document:
-    def __init__(self, text:str, date:Date=None, path:(str|Path)=None, return_lowercase:bool=True) -> None:
+    def __init__(self, text:list[str], date:Date=None, path:(str|Path)=None, return_lowercase:bool=True) -> None:
         self._text = text
         self.return_lowercase = return_lowercase
         if date is None:
@@ -17,8 +17,8 @@ class Document:
         
 
     @property
-    def text(self):
-        return self._text.lower() if self.return_lowercase else self._text
+    def text(self) -> list[str]:
+        return [val.lower() for val in self._text] if self.return_lowercase else self._text
     
     @property
     def date(self):
