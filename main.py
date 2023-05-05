@@ -8,6 +8,7 @@ from transformers import BertTokenizer, BertForNextSentencePrediction
 from keybert import KeyBERT
 from statics.stop_words import STOP_WORDS
 import torch
+from IO.Read import DocumentReader
 
 def keyword_extractor(doc:str):
     model = KeyBERT()
@@ -26,17 +27,13 @@ def doc_list_keyword_extractor(doc_list:list) -> list[str]:
     return res
 
 def main():
-    inp = open(INPUT_PATH)
-    inp_list = []
-    for line in inp:
-        inp_list.append(line.lower())
-    inp.close()
+    doc_list = DocumentReader(INPUT_PATH).read_all()
 
-    sb_res = sb(inp_list)
+    sb_res = sb([doc.text for doc in doc_list])
 
     KM_model = kmeans(sb_res, N_CLUSTERS)
     
-    clustered_sentences = cluster_inp_list(inp_list, KM_model)
+    clustered_sentences = cluster_inp_list([doc.text for doc in doc_list], KM_model)
     
     cluster_tfidf_vector_list = tfidf_list(clustered_sentences)
 
