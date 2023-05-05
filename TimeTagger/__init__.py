@@ -35,7 +35,7 @@ OUTPUTS = {
 	'xmi':heideltime_standalone.OutputType.XMI
 }
 
-CONFIG = 'HeidelTime/config.props'
+CONFIG = 'TimeTagger/config.props'
 
 
 class HTW():
