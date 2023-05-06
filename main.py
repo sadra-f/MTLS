@@ -12,6 +12,16 @@ from IO.Read import DocumentReader
 from pathlib import Path
 from clustering.testdbscan import dbsacn
 from scipy.spatial.distance import euclidean
+from TimeTagger.HeidelTime_Generator import ht
+from datetime import date, datetime
+import xml.etree.ElementTree as ET
+
+def date_parser(date_str:str) -> date|None:
+    try:
+        return datetime.strptime(date_str, '%Y-%m-%d')
+    except Exception as e:
+        return None
+
 
 def keyword_extractor(doc:str):
     model = KeyBERT()
@@ -31,6 +41,19 @@ def doc_list_keyword_extractor(doc_list:list) -> list[str]:
 
 def main():
     doc_list = DocumentReader(INPUT_PATH, parent_as_date=False).read_all()
+
+    for doc in doc_list:
+        doc.date = date.today()
+        doc_ht = ht(doc.text, date=doc.date)
+        for i in range(len(doc_ht)):
+            xml_tree = ET.fromstring(doc_ht[i])
+            if len(xml_tree) > 0 :
+                for tag in xml_tree:
+                    if tag.attrib["type"] == "DATE":
+                        dt = date_parser.parse(tag.attrib["value"])
+                        doc.text[i].date = date.today() if dt is None else dt
+                        print(tag.attrib["value"])
+                    print(tag.attrib)
 
     sb_res = sb([doc.text for doc in doc_list])
 
