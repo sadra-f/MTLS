@@ -18,7 +18,8 @@ import xml.etree.ElementTree as ET
 
 def date_parser(date_str:str) -> date|None:
     try:
-        return datetime.strptime(date_str, '%Y-%m-%d')
+        value = datetime.strptime(date_str, '%Y-%m-%d')
+        return value
     except Exception as e:
         return None
 
@@ -50,7 +51,7 @@ def main():
             if len(xml_tree) > 0 :
                 for tag in xml_tree:
                     if tag.attrib["type"] == "DATE":
-                        dt = date_parser.parse(tag.attrib["value"])
+                        dt = date_parser(tag.attrib["value"])
                         doc.text[i].date = date.today() if dt is None else dt
                         print(tag.attrib["value"])
                     print(tag.attrib)
