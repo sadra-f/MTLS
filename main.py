@@ -13,8 +13,29 @@ from pathlib import Path
 from clustering.testdbscan import dbsacn
 from scipy.spatial.distance import euclidean
 from TimeTagger.HeidelTime_Generator import ht
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import xml.etree.ElementTree as ET
+from numpy import dot, ndarray
+from numpy.linalg import norm
+import numpy as np
+
+
+def date_day_diff(date1:date, date2:date):
+    return abs((date2 - date1).days)
+
+def normalized_date_diff(date1:date, date2:date):
+    return pow(TIME_DISTANCE_CONST, date_day_diff(date1, date2))
+
+def vector_length(vector:ndarray):
+    return np.sqrt(vector.dot(vector))
+
+def cosine_distance(vector1:ndarray, vector2:ndarray):
+    #to get cosine similarity remove the "1 - ..." or subtract 1 from the result and get the absolute value
+    return 1 - ( dot(vector1, vector2) / ( vector_length(vector1) * vector_length(vector2) ) )
+
+def sentence_distance(vector1:ndarray, date1:date, vector2:ndarray, date2:date, do_normalize_vectors:bool=True):
+    return MTLS_DISTANCE_CONST * normalized_date_diff(date1, date2) + (1 - MTLS_DISTANCE_CONST) * cosine_distance(vector1, vector2, do_normalize_vectors)
+
 
 def date_parser(date_str:str) -> date|None:
     try:
@@ -43,20 +64,21 @@ def doc_list_keyword_extractor(doc_list:list) -> list[str]:
 def main():
     doc_list = DocumentReader(INPUT_PATH, parent_as_date=False).read_all()
 
-    for doc in doc_list:
-        doc.date = date.today()
-        doc_ht = ht(doc.text, date=doc.date)
-        for i in range(len(doc_ht)):
-            xml_tree = ET.fromstring(doc_ht[i])
-            if len(xml_tree) > 0 :
-                for tag in xml_tree:
-                    if tag.attrib["type"] == "DATE":
-                        dt = date_parser(tag.attrib["value"])
-                        doc.text[i].date = date.today() if dt is None else dt
-                        print(tag.attrib["value"])
-                    print(tag.attrib)
+    # for doc in doc_list:
+    #     doc.date = date.today()
+    #     doc_ht = ht(doc.text, date=doc.date)
+    #     for i in range(len(doc_ht)):
+    #         xml_tree = ET.fromstring(doc_ht[i])
+    #         if len(xml_tree) > 0 :
+    #             for tag in xml_tree:
+    #                 if tag.attrib["type"] == "DATE":
+    #                     dt = date_parser(tag.attrib["value"])
+    #                     doc.text[i].date = date.today() if dt is None else dt
+    #                     print(tag.attrib["value"])
+    #                 print(tag.attrib)
 
-    sb_res = sb([doc.text for doc in doc_list])
+    # sb_res = sb([doc.text for doc in doc_list])
+    sb_res = sb(doc_list[0].text)
 
     KM_model = kmeans(sb_res, N_CLUSTERS)
     
