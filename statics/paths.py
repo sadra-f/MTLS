@@ -8,11 +8,11 @@ STR_OUTPUT_PATH_KM = 'test_io/output_km.txt'
 STR_OUTPUT_PATH_DF = 'test_io\\output_Dataframe.html'
 
 from pathlib import Path
-INPUT_PATH = Path('test_io/input.txt')
-OUTPUT_PATH_TEST = Path('test_io/output_test.txt')
-OUTPUT_PATH_TEST2 = Path('test_io/output_test2.txt')
-OUTPUT_PATH = Path('test_io/output.txt')
-OUTPUT_PATH_HT = Path('test_io/output_HT.txt')
-OUTPUT_PATH_SB = Path('test_io/output_SB.txt')
-OUTPUT_PATH_KM = Path('test_io/output_km.txt')
-OUTPUT_PATH_DF = Path('test_io\\output_Dataframe.html')
+INPUT_PATH = Path(STR_INPUT_PATH)
+OUTPUT_PATH_TEST = Path(STR_OUTPUT_PATH_TEST)
+OUTPUT_PATH_TEST2 = Path(STR_OUTPUT_PATH_TEST2)
+OUTPUT_PATH = Path(STR_OUTPUT_PATH)
+OUTPUT_PATH_HT = Path(STR_OUTPUT_PATH_HT)
+OUTPUT_PATH_SB = Path(STR_OUTPUT_PATH_SB)
+OUTPUT_PATH_KM = Path(STR_OUTPUT_PATH_KM)
+OUTPUT_PATH_DF = Path(STR_OUTPUT_PATH_DF)
