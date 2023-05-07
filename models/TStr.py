@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date as Date
 
 class TStr(str):
     """
@@ -18,8 +18,8 @@ class TStr(str):
         return self._date
 
     def set_date(self, date):
-        self.date = date
+        self._date = date
 
 
-    def get_date(self)->date:
-        return self.date
+    def get_date(self)->Date:
+        return self._date

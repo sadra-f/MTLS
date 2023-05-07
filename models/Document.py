@@ -8,7 +8,7 @@ class Document:
         self._text = text
         if date is None:
             self._date = Date.today()
-        else:
+        else:# dont do this here !!!
             self._date = date
         if path is not None:
             if type(path) is str:
