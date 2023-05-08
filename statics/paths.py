@@ -1,5 +1,5 @@
 STR_INPUT_PATH = 'test_io/input.txt'
-# STR_INPUT_PATH = 'C:/Users/TOP/Desktop/New folder'
+STR_INPUT_PATH = 'C:/Users/TOP/Desktop/New folder'
 STR_OUTPUT_PATH_TEST = 'test_io/output_test.txt'
 STR_OUTPUT_PATH_TEST2 = 'test_io/output_test2.txt'
 STR_OUTPUT_PATH = 'test_io/output.txt'

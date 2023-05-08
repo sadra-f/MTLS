@@ -36,7 +36,7 @@ class DocumentReader:
         if path.is_file():
             with open(path) as file:
                 parent_dir_name = path.parent.name
-                return Document([TStr(line.lower()) if self.to_lower else TStr(line.lower()) for line in file], Date.fromisoformat(parent_dir_name) if parent_as_date else Date.today(), path)
+                return Document([TStr(line.lower()) if self.to_lower else TStr(line.lower()) for line in file], Date.fromisoformat(parent_dir_name) if parent_as_date else None, path)
             
     def read_all(self) -> list[Document]:
         result = []

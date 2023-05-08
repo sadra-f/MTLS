@@ -48,18 +48,18 @@ def main():
     doc_list = DocumentReader(INPUT_PATH, parent_as_date=False).read_all()
     ms = set()
     sb_list = []
+    cntr = 0
     for i in range(len(doc_list)):
-        cntr = 0
-        doc_list[i].date = date.today()
+        # doc_list[i].date = date.today()
         doc_ht = ht(doc_list[i].text, date=doc_list[i].date)
         for j in range(len(doc_ht)):
+            cntr += 1
             xml_tree = ET.fromstring(doc_ht[j])
             if len(xml_tree) > 0 :
                 for tag in xml_tree:
                     if tag.attrib["type"] == "DATE":
                         dt = date_parser(tag.attrib["value"])
                         doc_list[i].text[j].date = doc_list[i].date if dt is None else dt
-                        cntr += 1
                         print(tag.attrib["value"])
                         ms.add(tag.attrib["value"])
                     else:
@@ -71,7 +71,7 @@ def main():
 
     dist = []
     for i in range(len(doc_list)):
-        dist.append([])
+        # dist.append([])
         for j in range(len(doc_list[i].text)):
             dist[i].append([])
             for k in range(len(doc_list[i].text)):
@@ -79,9 +79,9 @@ def main():
                 dist[i][j][k] = sentence_distance(sb_list[i][j], doc_list[i].text[j].date, sb_list[i][k], doc_list[i].text[k].date)
     print(1)
 
+    dbsacn(dist[0], 0.1, 3)
 
-
-    KM_model = kmeans(sb_res[0], N_CLUSTERS)
+    # KM_model = kmeans(sb_res[0], N_CLUSTERS)
     
     clustered_sentences = cluster_inp_list([doc.text for doc in doc_list], KM_model)
     
