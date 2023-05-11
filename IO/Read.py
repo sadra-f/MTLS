@@ -4,9 +4,9 @@ from models.Document import Document
 from models.TStr import TStr
 
 class DocumentReader:
-    def __init__(self, path:Path, file_pattern:str="*.txt", parent_as_date:bool=True, recursive:bool=True, to_lower:bool=True):
+    def __init__(self, path:Path, file_pattern:str="*.txt", parent_dir_as_date:bool=True, recursive:bool=True, to_lower:bool=True):
         self._path = path
-        self.parent_as_date = parent_as_date
+        self.parent_as_date = parent_dir_as_date
         self.to_lower = to_lower
         self._is_directory = False
         self._is_file = False
