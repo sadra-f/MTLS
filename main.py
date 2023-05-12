@@ -19,13 +19,7 @@ from numpy import dot, ndarray
 from numpy.linalg import norm
 import numpy as np
 from distances import sentence_distance
-
-def date_parser(date_str:str) -> date|None:
-    try:
-        value = datetime.strptime(date_str, '%Y-%m-%d')
-        return date(value.year, value.month, value.day)
-    except Exception as e:
-        return None
+from DateParser import DateParser as DP
 
 
 def keyword_extractor(doc:str):
@@ -45,42 +39,35 @@ def doc_list_keyword_extractor(doc_list:list) -> list[str]:
     return res
 
 def main():
-    doc_list = DocumentReader(INPUT_PATH, parent_as_date=False).read_all()
-    ms = set()
-    sb_list = []
-    cntr = 0
+    doc_list = DocumentReader(INPUT_PATH, parent_dir_as_date=False).read_all()
+    sent_list = []
     for i in range(len(doc_list)):
-        # doc_list[i].date = date.today()
         doc_ht = ht(doc_list[i].text, date=doc_list[i].date)
         for j in range(len(doc_ht)):
-            cntr += 1
-            xml_tree = ET.fromstring(doc_ht[j])
-            if len(xml_tree) > 0 :
-                for tag in xml_tree:
-                    if tag.attrib["type"] == "DATE":
-                        dt = date_parser(tag.attrib["value"])
-                        doc_list[i].text[j].date = doc_list[i].date if dt is None else dt
-                        print(tag.attrib["value"])
-                        ms.add(tag.attrib["value"])
-                    else:
-                        doc_list[i].text[j].date = doc_list[i].date
-                    print(tag.attrib)
-            else:
+            try:
+                xml_tree = ET.fromstring(doc_ht[j])
+                if len(xml_tree) > 0 :
+                    for tag in xml_tree:
+                        doc_list[i].text[j].date = DP.parse(tag.attrib["value"], doc_list[i].date, DO_LOG)
+                else:
+                    doc_list[i].text[j].date = doc_list[i].date
+            except Exception as e:
                 doc_list[i].text[j].date = doc_list[i].date
-        sb_list.append(sb(doc_list[i].text))
+            finally:
+                sent_list.append(doc_list[i].text[j])
+
+    sb_result = sb(sent_list)
 
     dist = []
-    for i in range(len(doc_list)):
-        # dist.append([])
-        for j in range(len(doc_list[i].text)):
-            dist[i].append([])
-            for k in range(len(doc_list[i].text)):
-                dist[i][j].append([])
-                dist[i][j][k] = sentence_distance(sb_list[i][j], doc_list[i].text[j].date, sb_list[i][k], doc_list[i].text[k].date)
-    print(1)
+    for i in range(len(sent_list)):
+        dist.append([])
+        for j in range(len(sent_list)):
+            dist[i].append(sentence_distance(sb_result[i], sent_list[i].date, sb_result[j], sent_list[j].date))
 
-    dbsacn(dist[0], 0.1, 3)
 
+    print(dbsacn(dist, 0.1, 3))
+
+    return
     # KM_model = kmeans(sb_res[0], N_CLUSTERS)
     
     clustered_sentences = cluster_inp_list([doc.text for doc in doc_list], KM_model)
