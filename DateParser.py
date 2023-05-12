@@ -19,7 +19,7 @@ class DateParser: #the specificity goes as high as days
     DEFAULT_DAY = 15
 
 
-    def parse(date_str:str, default_date:date = None) -> date:
+    def parse(date_str:str, default_date:date = None, do_log=False) -> date:
         res = date.today() if default_date is None else default_date
         try:
             if re.search(DateParser.FULL_DATE_PTRN, date_str) is not None:
@@ -50,7 +50,8 @@ class DateParser: #the specificity goes as high as days
                 values = [date_str[0:3] + '5']
                 res = date(int(values[0]), DateParser.DEFAULT_MONTH, DateParser.DEFAULT_DAY)
         except ValueError as err:
-            print("Error parsing date value: { ", date_str, ' }')
+            if do_log:
+                print("Error parsing date value: { ", date_str, ' }')
         finally:
             return res
             
