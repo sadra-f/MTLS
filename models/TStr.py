@@ -16,10 +16,3 @@ class TStr(str):
     @date.getter
     def date(self):
         return self._date
-
-    def set_date(self, date):
-        self._date = date
-
-
-    def get_date(self)->Date:
-        return self._date
