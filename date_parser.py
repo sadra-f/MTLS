@@ -23,7 +23,7 @@ class DateParser: #the specificity goes as high as days
     def __init__(self, current_date:date):
         self.current_date = current_date
 
-    def extract_date(self, date_str:str) -> date:
+    def parse(self, date_str:str) -> date:
         res = self.current_date
         try:
             if re.search(DateParser.FULL_DATE_PTRN, date_str) is not None:
