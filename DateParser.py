@@ -19,8 +19,8 @@ class DateParser: #the specificity goes as high as days
     DEFAULT_DAY = 15
 
 
-    def parse(default_date:date, date_str:str) -> date:
-        res = default_date
+    def parse(date_str:str, default_date:date = None) -> date:
+        res = date.today() if default_date is None else default_date
         try:
             if re.search(DateParser.FULL_DATE_PTRN, date_str) is not None:
                 values = date_str.split('-')
