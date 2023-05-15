@@ -16,3 +16,15 @@ class TStr(str):
     @date.getter
     def date(self):
         return self._date
+    
+    @property
+    def doc_path(self):
+        return self._doc_path
+    
+    @doc_path.setter
+    def doc_path(self, value):
+        self._doc_path = value
+    
+    @doc_path.getter
+    def doc_path(self):
+        return self._doc_path

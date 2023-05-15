@@ -4,7 +4,7 @@ from models.TStr import TStr
 
 
 class Document:
-    def __init__(self, text:list[TStr], date:Date=None, path:(str|Path)=None) -> None:
+    def __init__(self, text:list[TStr], path:(str|Path), date:Date=None) -> None:
         self._text = text
         if date is None:
             self._date = Date.today()
@@ -15,13 +15,13 @@ class Document:
                 self._path = Path(path)
             else:
                 self._path = path
+        self._set_text_date()
         
 
     @property
     def text(self):
         return self._text
         
-    
     @text.setter
     def text(self, value:list[TStr]):
         self._text = value
@@ -29,6 +29,7 @@ class Document:
     @text.getter
     def text(self) -> list[TStr]:
         return self._text
+
 
     @property
     def date(self):
@@ -42,7 +43,12 @@ class Document:
     def date(self) -> Date:
         return self._date
 
+
     @property
     def path(self):
         return self._path
 
+
+    def _set_text_date(self):
+        for t in self._text:
+            t.doc_path = self._path
