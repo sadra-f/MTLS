@@ -5,8 +5,6 @@ from IO.Write import print_seperated_file
 from Vectorize.sentence_bert import sb_vectorizer as sb
 from Vectorize.tfidf import tfidf_list
 from transformers import BertTokenizer, BertForNextSentencePrediction
-from keybert import KeyBERT
-from statics.stop_words import STOP_WORDS
 import torch
 from IO.Read import DocumentReader
 from pathlib import Path
@@ -20,26 +18,12 @@ from numpy.linalg import norm
 import numpy as np
 from distances import sentence_distance
 from DateParser import DateParser as DP
+from helpers import *
 
-
-def keyword_extractor(doc:str):
-    model = KeyBERT()
-    return model.extract_keywords(doc, keyphrase_ngram_range=(1,2 if KEYPHRASE else 1), stop_words=STOP_WORDS)
-
-def doc_list_keyword_extractor(doc_list:list) -> list[str]:
-    res = []
-    for cluster_sentence_list in doc_list:
-        #tmp
-        tmp_str = ""
-        for k in cluster_sentence_list:
-            tmp_str += k
-        #/tmp
-        phrase_tuple_list = keyword_extractor(tmp_str)
-        res.append([phrase_tuple_list[i][0] for i in range(len(phrase_tuple_list))])
-    return res
 
 def main():
     doc_list = DocumentReader(INPUT_PATH, parent_dir_as_date=False).read_all()
+    print(len(doc_list))
     sent_list = []
     for i in range(len(doc_list)):
         doc_ht = ht(doc_list[i].text, date=doc_list[i].date)
@@ -64,10 +48,15 @@ def main():
         for j in range(len(sent_list)):
             dist[i].append(sentence_distance(sb_result[i], sent_list[i].date, sb_result[j], sent_list[j].date))
 
+    strd = sort_dist(dist)
+    for  i in range(len(strd)):
+        tmp = strd[i][1:4]
+        tmp.append(strd[i][len(strd)-4:len(strd)])
+        strd[i] = tmp
+        
+    TMP = dbsacn(dist, DBSCAN_EPSILON, DBSCAN_MINPOINT)
+    print(dbsacn(dist, DBSCAN_EPSILON, DBSCAN_MINPOINT))
 
-    print(dbsacn(dist, 0.1, 3))
-
-    return
     # KM_model = kmeans(sb_res[0], N_CLUSTERS)
     
     clustered_sentences = cluster_inp_list([doc.text for doc in doc_list], KM_model)
