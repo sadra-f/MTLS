@@ -1,6 +1,6 @@
 from statics.paths import *
 from statics.config import *
-from clustering.KMeans_clustering import kmeans, cluster_inp_list
+from clustering.helpers import cluster_inp_list
 from IO.Write import print_seperated_file
 from Vectorize.sentence_bert import sb_vectorizer as sb
 from Vectorize.tfidf import tfidf_list
@@ -8,7 +8,7 @@ from transformers import BertTokenizer, BertForNextSentencePrediction
 import torch
 from IO.Read import DocumentReader
 from pathlib import Path
-from clustering.testdbscan import dbsacn
+from clustering.DBSCAN import dbscan
 from scipy.spatial.distance import euclidean
 from TimeTagger.HeidelTime_Generator import ht
 from datetime import date, datetime, timedelta
@@ -16,9 +16,9 @@ import xml.etree.ElementTree as ET
 from numpy import dot, ndarray
 from numpy.linalg import norm
 import numpy as np
-from distances import sentence_distance
-from DateParser import DateParser as DP
-from helpers import *
+from helpers.distances import *
+from helpers.DateParser import DateParser as DP
+from helpers.helpers import *
 
 
 def main():
@@ -54,12 +54,12 @@ def main():
         tmp.append(strd[i][len(strd)-4:len(strd)])
         strd[i] = tmp
         
-    TMP = dbsacn(dist, DBSCAN_EPSILON, DBSCAN_MINPOINT)
-    print(dbsacn(dist, DBSCAN_EPSILON, DBSCAN_MINPOINT))
+    TMP = dbscan(dist, DBSCAN_EPSILON, DBSCAN_MINPOINT)
+    # print(dbscan(dist, DBSCAN_EPSILON, DBSCAN_MINPOINT))
 
     # KM_model = kmeans(sb_res[0], N_CLUSTERS)
     
-    clustered_sentences = cluster_inp_list([doc.text for doc in doc_list], KM_model)
+    clustered_sentences = cluster_inp_list(sent_list, TMP.labels, len(TMP.clusters))
     
     cluster_tfidf_vector_list = tfidf_list(clustered_sentences)
 
