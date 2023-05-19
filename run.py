@@ -1,9 +1,7 @@
 from statics.paths import *
 from statics.config import *
 from clustering.helpers import cluster_inp_list
-from IO.Write import print_seperated_file
-from Vectorize.sentence_bert import sb_vectorizer as sb
-from Vectorize.tfidf import tfidf_list
+from Vector.sentence_bert import sb_vectorizer as sb
 from transformers import BertTokenizer, BertForNextSentencePrediction
 import torch
 from IO.Read import DocumentReader
@@ -11,11 +9,7 @@ from pathlib import Path
 from clustering.DBSCAN import dbscan
 from scipy.spatial.distance import euclidean
 from TimeTagger.HeidelTime_Generator import ht
-from datetime import date, datetime, timedelta
 import xml.etree.ElementTree as ET
-from numpy import dot, ndarray
-from numpy.linalg import norm
-import numpy as np
 from helpers.distances import *
 from helpers.DateParser import DateParser as DP
 from helpers.helpers import *
@@ -45,6 +39,8 @@ def main():
     dist = []
     for i in range(len(sent_list)):
         dist.append([])
+        sent_list[i].id = i
+        sent_list[i].vector = sb_result[i]
         for j in range(len(sent_list)):
             dist[i].append(sentence_distance(sb_result[i], sent_list[i].date, sb_result[j], sent_list[j].date))
 
@@ -55,13 +51,8 @@ def main():
         strd[i] = tmp
         
     TMP = dbscan(dist, DBSCAN_EPSILON, DBSCAN_MINPOINT)
-    # print(dbscan(dist, DBSCAN_EPSILON, DBSCAN_MINPOINT))
-
-    # KM_model = kmeans(sb_res[0], N_CLUSTERS)
     
     clustered_sentences = cluster_inp_list(sent_list, TMP.labels, len(TMP.clusters))
-    
-    cluster_tfidf_vector_list = tfidf_list(clustered_sentences)
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     model = BertForNextSentencePrediction.from_pretrained('bert-base-uncased')
@@ -71,32 +62,25 @@ def main():
 
     # test keybert
     cluster_main_phrases = doc_list_keyword_extractor(clustered_sentences)
+    return
+    # for i in range(TMP.cluster_count):
+    #     tmp = ""
+    #     for j in range(N_REPRESENTING_PHRASES):
+    #         tmp += f' {cluster_main_phrases[i][j]}'
+    #     cluster_main_phrases[i] = tmp
 
-    for i in range(N_CLUSTERS):
-        tmp = ""
-        for j in range(N_REPRESENTING_PHRASES):
-            tmp += f' {cluster_main_phrases[i][j]}'
-        cluster_main_phrases[i] = tmp
+    #     for j in range(TMP.cluster_count):
+    #         bfnsp_cluster_sentence.append([])
+    #         for i in range(len(clustered_sentences[j])):
+    #             inputs = tokenizer(clustered_sentences[j][i],cluster_main_phrases[j], return_tensors='pt')
+    #             labels = torch.LongTensor([0])
+    #             outputs = model(**inputs, labels=labels)
 
-        for j in range(N_CLUSTERS):
-            bfnsp_cluster_sentence.append([])
-            for i in range(len(clustered_sentences[j])):
-                inputs = tokenizer(clustered_sentences[j][i],cluster_main_phrases[j], return_tensors='pt')
-                labels = torch.LongTensor([0])
-                outputs = model(**inputs, labels=labels)
+    #             bfnsp_cluster_sentence[j].append((clustered_sentences[j][i], outputs.logits[0][0].item()))
 
-                bfnsp_cluster_sentence[j].append((clustered_sentences[j][i], outputs.logits[0][0].item()))
-
-    for i in range(N_CLUSTERS):
-        bfnsp_cluster_sentence[i] = sorted(bfnsp_cluster_sentence[i], key=lambda x: x[1], reverse=True)
-    print(clustered_sentences)
-
-    for i in range(N_CLUSTERS):
-        for j in range(3):#3 is the number of representing sentences in cluster
-            print()
-            print(bfnsp_cluster_sentence[i][j])
-            print()
-        print("#####################################")
+    # for i in range(TMP.cluster_count):
+    #     bfnsp_cluster_sentence[i] = sorted(bfnsp_cluster_sentence[i], key=lambda x: x[1], reverse=True)
+    # print(clustered_sentences)
     
 
 
