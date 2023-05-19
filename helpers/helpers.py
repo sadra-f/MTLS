@@ -1,6 +1,7 @@
 from keybert import KeyBERT
 from statics.stop_words import STOP_WORDS
 from statics.config import KEYPHRASE
+
 def sort_dist(dist:list):
     res = []
     for i in range(len(dist)):
@@ -11,6 +12,7 @@ def sort_dist(dist:list):
 def keyword_extractor(doc:str):
     model = KeyBERT()
     return model.extract_keywords(doc, keyphrase_ngram_range=(1,2 if KEYPHRASE else 1), stop_words=STOP_WORDS)
+
 
 def doc_list_keyword_extractor(doc_list:list) -> list[str]:
     res = []
