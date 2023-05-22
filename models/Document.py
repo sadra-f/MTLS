@@ -16,7 +16,8 @@ class Document:
             else:
                 self._path = path
         self._set_text_date()
-        
+        for i in range(len(self._text)):
+            self._text[i].doc_path = hash(self._path)
 
     @property
     def text(self):
