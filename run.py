@@ -4,7 +4,7 @@ from clustering.helpers import cluster_inp_list
 from Vector.sentence_bert import sb_vectorizer as sb
 from transformers import BertTokenizer, BertForNextSentencePrediction
 import torch
-from IO.Read import DocumentReader
+from IO.DocumentReader import DocumentReader
 from pathlib import Path
 from clustering.DBSCAN import dbscan
 from scipy.spatial.distance import euclidean
