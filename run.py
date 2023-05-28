@@ -14,11 +14,8 @@ from helpers.distances import *
 from helpers.DateParser import DateParser as DP
 from helpers.helpers import *
 
-
-def main():
-    doc_list = DocumentReader(INPUT_PATH, parent_dir_as_date=False).read_all()
-    print(len(doc_list))
-    sent_list = []
+def extract_sentences(doc_list):
+    result = []
     for i in range(len(doc_list)):
         doc_ht = ht(doc_list[i].text, date=doc_list[i].date)
         for j in range(len(doc_ht)):
@@ -32,7 +29,13 @@ def main():
             except Exception as e:
                 doc_list[i].text[j].date = doc_list[i].date
             finally:
-                sent_list.append(doc_list[i].text[j])
+                result.append(doc_list[i].text[j])
+    return result
+
+def main():
+    doc_list = DocumentReader(INPUT_PATH, parent_dir_as_date=False).read_all()
+    print(len(doc_list))
+    sent_list = extract_sentences(doc_list)
 
     sb_result = sb(sent_list)
 
@@ -44,11 +47,12 @@ def main():
         for j in range(len(sent_list)):
             dist[i].append(sentence_distance(sb_result[i], sent_list[i].date, sb_result[j], sent_list[j].date))
 
-    strd = sort_dist(dist)
-    for  i in range(len(strd)):
-        tmp = strd[i][1:4]
-        tmp.append(strd[i][len(strd)-4:len(strd)])
-        strd[i] = tmp
+    #find smallest/largest distances
+    sorted_dist = sort_dist(dist)
+    for  i in range(len(sorted_dist)):
+        tmp = sorted_dist[i][1:4]
+        tmp.append(sorted_dist[i][len(sorted_dist)-4:len(sorted_dist)])
+        sorted_dist[i] = tmp
         
     TMP = dbscan(dist, DBSCAN_EPSILON, DBSCAN_MINPOINT)
     
