@@ -4,7 +4,7 @@ from clustering.helpers import cluster_inp_list
 from Vector.sentence_bert import sb_vectorizer as sb
 from transformers import BertTokenizer, BertForNextSentencePrediction
 import torch
-from IO.DocumentReader import DocumentReader
+from IO.DocumentRW import DocumentReader
 from clustering.DBSCAN import dbscan
 from scipy.spatial.distance import euclidean
 from TimeTagger.HeidelTime_Generator import ht
@@ -22,7 +22,7 @@ def extract_sentences(doc_list):
                 xml_tree = ET.fromstring(doc_ht[j])
                 if len(xml_tree) > 0 :
                     for tag in xml_tree:
-                        doc_list[i].text[j].date = DP.parse(tag.attrib["value"], doc_list[i].date, DO_LOG)
+                        doc_list[i].text[j].date = DP.parse(tag.attrib["value"], doc_list[i].date, DO_EXEC_LOG)
                 else:
                     doc_list[i].text[j].date = doc_list[i].date
             except Exception as e:
