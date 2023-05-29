@@ -33,7 +33,7 @@ def extract_sentences(doc_list):
     return result
 
 def main():
-    doc_list = DocumentReader(INPUT_PATH, parent_dir_as_date=False).read_all()
+    doc_list = DocumentReader(INPUT_PATH, parent_dir_as_date=True).read_all()
     print(len(doc_list))
     sent_list = extract_sentences(doc_list)
 
@@ -54,9 +54,9 @@ def main():
         tmp.append(sorted_dist[i][len(sorted_dist)-4:len(sorted_dist)])
         sorted_dist[i] = tmp
         
-    TMP = dbscan(dist, DBSCAN_EPSILON, DBSCAN_MINPOINT)
+    clusters = dbscan(dist, DBSCAN_EPSILON, DBSCAN_MINPOINT)
     
-    clustered_sentences = cluster_inp_list(sent_list, TMP.labels, len(TMP.clusters))
+    clustered_sentences = cluster_inp_list(sent_list, clusters.labels, len(clusters.clusters))
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     model = BertForNextSentencePrediction.from_pretrained('bert-base-uncased')
@@ -66,25 +66,34 @@ def main():
 
     # test keybert
     cluster_main_phrases = doc_list_keyword_extractor(clustered_sentences)
+    
+    for i in range(clusters.cluster_count):
+        tmp = ""
+        for j in range(N_REPRESENTING_PHRASES):
+            tmp += f' {cluster_main_phrases[i][j]}'
+        cluster_main_phrases[i] = tmp
+
+    for j in range(clusters.cluster_count):
+        bfnsp_cluster_sentence.append([])
+        for i in range(len(clustered_sentences[j])):
+            inputs = tokenizer(clustered_sentences[j][i],cluster_main_phrases[j], return_tensors='pt')
+            labels = torch.LongTensor([0])
+            outputs = model(**inputs, labels=labels)
+
+            bfnsp_cluster_sentence[j].append((clustered_sentences[j][i], outputs.logits[0][0].item()))
+
+    for i in range(clusters.cluster_count):
+        bfnsp_cluster_sentence[i] = sorted(bfnsp_cluster_sentence[i], key=lambda x: x[1], reverse=True)
+    print(clustered_sentences)
+
+    #build cluster vectors of document percentages
+    cluster_vectors = np.zeros((clusters.cluster_count, len(doc_list)))
+
+    for i in range(clusters.cluster_count):
+        for j in range(len(clustered_sentences[i])):
+            cluster_vectors[i][clustered_sentences[i][j].doc_id] += 1
+    
     return
-    # for i in range(TMP.cluster_count):
-    #     tmp = ""
-    #     for j in range(N_REPRESENTING_PHRASES):
-    #         tmp += f' {cluster_main_phrases[i][j]}'
-    #     cluster_main_phrases[i] = tmp
-
-    #     for j in range(TMP.cluster_count):
-    #         bfnsp_cluster_sentence.append([])
-    #         for i in range(len(clustered_sentences[j])):
-    #             inputs = tokenizer(clustered_sentences[j][i],cluster_main_phrases[j], return_tensors='pt')
-    #             labels = torch.LongTensor([0])
-    #             outputs = model(**inputs, labels=labels)
-
-    #             bfnsp_cluster_sentence[j].append((clustered_sentences[j][i], outputs.logits[0][0].item()))
-
-    # for i in range(TMP.cluster_count):
-    #     bfnsp_cluster_sentence[i] = sorted(bfnsp_cluster_sentence[i], key=lambda x: x[1], reverse=True)
-    # print(clustered_sentences)
     
 
 
