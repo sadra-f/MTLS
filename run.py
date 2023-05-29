@@ -5,7 +5,6 @@ from Vector.sentence_bert import sb_vectorizer as sb
 from transformers import BertTokenizer, BertForNextSentencePrediction
 import torch
 from IO.DocumentReader import DocumentReader
-from pathlib import Path
 from clustering.DBSCAN import dbscan
 from scipy.spatial.distance import euclidean
 from TimeTagger.HeidelTime_Generator import ht
