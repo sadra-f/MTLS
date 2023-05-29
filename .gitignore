@@ -5,3 +5,4 @@ __pycache__/
 todo.txt
 .vscode/
 clustering/deepDPM/
+log/
