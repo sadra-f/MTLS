@@ -12,11 +12,14 @@ import xml.etree.ElementTree as ET
 from helpers.distances import *
 from helpers.DateParser import DateParser as DP
 from helpers.helpers import *
+from IO.HeidelTimeRW import HeideltimeRW as HRW
 
 def extract_sentences(doc_list):
     result = []
     for i in range(len(doc_list)):
         doc_ht = ht(doc_list[i].text, date=doc_list[i].date)
+        HRW.write(doc_ht, doc_list[i].path, doc_list[i].id)
+        tp = HRW.read_all()
         for j in range(len(doc_ht)):
             try:
                 xml_tree = ET.fromstring(doc_ht[j])
