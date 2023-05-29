@@ -4,7 +4,11 @@ from models.TStr import TStr
 
 
 class Document:
+    id_counter = 0
+
     def __init__(self, text:list[TStr], path:(str|Path), date:Date=None) -> None:
+        self.id = Document.id_counter
+        Document.id_counter += 1
         self._text = text
         if date is None:
             self._date = Date.today()
@@ -18,6 +22,8 @@ class Document:
         self._set_text_date()
         for i in range(len(self._text)):
             self._text[i].doc_path = self._path
+            self._text[i].doc_id = self.id
+            
 
     @property
     def text(self):

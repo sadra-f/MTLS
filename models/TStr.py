@@ -30,6 +30,18 @@ class TStr(str):
         return self._doc_path
     
     @property
+    def doc_id(self):
+        return self._doc_id
+    
+    @doc_id.setter
+    def doc_id(self, value):
+        self._doc_id = value
+    
+    @doc_id.getter
+    def doc_id(self):
+        return self._doc_id
+    
+    @property
     def id(self):
         return self.id
     
