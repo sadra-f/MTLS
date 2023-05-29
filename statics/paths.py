@@ -1,3 +1,9 @@
+#====================================================================================
+#set the dir for the Read/Write files and classes * Note to follow the pattern use dir or file name alike the original pattern
+#====================================================================================
+
+
+
 STR_INPUT_PATH = 'test_io/input.txt'
 
 STR_SENT_LIST_PATH= 'log/SENTENCES/'
