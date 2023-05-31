@@ -3,6 +3,8 @@ from statics.config import DO_EXEC_LOG
 import sys
 from datetime import datetime
 import re
+from pathlib import Path
+
 
 class HeideltimeRW:
     path = HT_LOG_PATH
@@ -12,7 +14,7 @@ class HeideltimeRW:
 
     def write(ht_list:list[str], origin_file_path, doc_id, open_as='w'):
         meta_data = HeideltimeRW.Meta(origin_file_path, doc_id)
-        file_path = str(HeideltimeRW.path) + '/' + re.subn("/|\\\\",'-', str(origin_file_path))[0]
+        file_path = Path(str(HeideltimeRW.path) + '\\' + re.subn("/|\\\\|:",'-', str(origin_file_path))[0])
 
         if open_as != 'w' and open_as != 'a':
             raise ValueError("open_as must have either the value 'w' or 'a'")
@@ -46,6 +48,7 @@ class HeideltimeRW:
                         meta = HeideltimeRW.Meta.obj_from_str(line)
                     else:
                         results.append(line)
+            print(f"Finished reading heideltime from file: {path}")
             return (results, meta)
         except:
             if DO_EXEC_LOG:
