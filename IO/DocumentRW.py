@@ -2,7 +2,7 @@ from datetime import date as Date
 from pathlib import Path
 from models.Document import Document
 from models.TStr import TStr
-
+from .helpers import docs_of_pattern
 class DocumentReader:
     def __init__(self, path:Path, file_pattern:str="*.txt", parent_dir_as_date:bool=True, recursive:bool=True, to_lower:bool=True):
         self._path = path
@@ -14,13 +14,8 @@ class DocumentReader:
         self.file_path_list = [] # on windows systems will be list[WindowsPath]
         if self._path.is_dir():
             self.is_directory = True
-            path_iterator = self._path.rglob(file_pattern) if recursive else self._path.glob(file_pattern)
-            while True:
-                try:
-                    self.file_path_list.append(next(path_iterator))
-                    self._doc_count += 1
-                except StopIteration:
-                    break
+            self.file_path_list, self._doc_count = docs_of_pattern(self._path,file_pattern, recursive)
+
         elif self._path.is_file():
             self.is_file = True
             self._doc_count = 1
