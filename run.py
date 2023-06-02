@@ -18,7 +18,7 @@ def extract_sentences(doc_list):
     result = []
     for i in range(len(doc_list)):
         doc_ht = ht(doc_list[i].text, date=doc_list[i].date)
-        HRW.write(doc_ht, doc_list[i].path, doc_list[i].id)
+        HRW.write_one_file(doc_ht, doc_list[i].path, doc_list[i].id)
         tp = HRW.read_all()
         for j in range(len(doc_ht)):
             try:
