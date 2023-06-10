@@ -45,5 +45,5 @@ class DocumentReader:
             result.append(self._read_file(self.file_path_list[0], self.parent_as_date))
         else:
             for path in self.file_path_list:
-                result.append(self._read_file(path, self.parent_as_date))
+                result.append(self._read_file(Path(path), self.parent_as_date))
         return result
