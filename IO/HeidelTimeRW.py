@@ -72,6 +72,7 @@ class HeideltimeRW:
         return results
 
     def replicate_dataset(ds_path:Path, dataset_dir_name:str):
+        
         def _init_log():
             with open(NEW_PATH_BASE+'.log', 'w') as file:
                 print("dataset path :" + ds_path, file=file)
@@ -79,9 +80,10 @@ class HeideltimeRW:
                 print("found doc # :" + doc_count, file=file)
                 print("init at :" + datetime.now(), file=file)
                 print('================================================================', file=file)
+
         def _log(origin_file, destination_file, length, result:bool, append_log):
             with open(NEW_PATH_BASE+'.log', 'a') as file:
-                print("ID :" + log.counter, file=file)
+                print("ID :" + _log.counter, file=file)
                 print("dataset file :" + origin_file, file=file)
                 print("destination file :" + destination_file, file=file)
                 print("length :" + length, file=file)
@@ -94,8 +96,7 @@ class HeideltimeRW:
         
         ds_path = ds_path.absolute()
         if re.search(f"{dataset_dir_name}$", str(ds_path)) is None:
-            if DO_EXEC_LOG: 
-                print("dataset_dir_name not at the end of ds_path ?! what are you doing ??")
+            print("dataset_dir_name not at the end of ds_path ?! what are you doing ??")
             return False
         
         ds_path_layers = re.split("\\", str(ds_path)) # delete me
