@@ -1,7 +1,8 @@
 from datetime import date
-from statics.config import MTLS_DISTANCE_CONST, TIME_DISTANCE_CONST
+from statics.config import MTLS_DISTANCE_CONST, TIME_DISTANCE_CONST, CLUSTER_DISTANCE_CONST
 import numpy as np
 from numpy import ndarray, dot
+from models.TStr import TStr
 
 def date_day_diff(date1:date, date2:date):
     return abs((date2 - date1).days)
@@ -21,3 +22,6 @@ def cosine_similarity(vector1:ndarray, vector2:ndarray):
 
 def sentence_distance(vector1:ndarray, date1:date, vector2:ndarray, date2:date):
     return MTLS_DISTANCE_CONST * normalized_date_diff(date1, date2) + (1 - MTLS_DISTANCE_CONST) * cosine_distance(vector1, vector2)
+
+def cluster_distance(cluster_vector_1:ndarray, sent1, cluster_vector_2:ndarray, sent2):
+    return CLUSTER_DISTANCE_CONST * cosine_distance(sent1, sent2) + (1 - CLUSTER_DISTANCE_CONST) * cosine_distance(cluster_vector_1, cluster_vector_2)
