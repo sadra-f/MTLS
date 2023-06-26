@@ -18,8 +18,8 @@ def extract_sentences(doc_list):
     result = []
     for i in range(len(doc_list)):
         doc_ht = ht(doc_list[i].text, date=doc_list[i].date)
-        # HRW.write_one_file(doc_ht, doc_list[i].path, doc_list[i].id)
-        # tp = HRW.read_all()
+        HRW.write_one_file(doc_ht, doc_list[i].path, doc_list[i].id)
+        tp = HRW.read_all()
         for j in range(len(doc_ht)):
             try:
                 xml_tree = ET.fromstring(doc_ht[j])
@@ -56,7 +56,7 @@ def main():
         tmp.append(sorted_dist[i][len(sorted_dist)-4:len(sorted_dist)])
         sorted_dist[i] = tmp
         
-    clusters = dbscan(dist, DBSCAN_EPSILON_1, DBSCAN_MINPOINT_1)
+    clusters = dbscan(dist, DBSCAN_EPSILON, DBSCAN_MINPOINT)
     
     clustered_sentences = cluster_inp_list(sent_list, clusters.labels, len(clusters.clusters))
 
@@ -72,10 +72,7 @@ def main():
     for i in range(clusters.cluster_count):
         tmp = ""
         for j in range(N_REPRESENTING_PHRASES):
-            try:
-                tmp += f' {cluster_main_phrases[i][j]}'
-            except IndexError:
-                break
+            tmp += f' {cluster_main_phrases[i][j]}'
         cluster_main_phrases[i] = tmp
 
     for j in range(clusters.cluster_count):
@@ -98,14 +95,6 @@ def main():
         for j in range(len(clustered_sentences[i])):
             cluster_vectors[i][clustered_sentences[i][j].doc_id] += 1
     
-    cluster_sim = np.zeros((len(cluster_vectors), len(cluster_vectors)))
-    for i in range(len(cluster_vectors)) :
-        for j in range(len(cluster_vectors)):
-            
-            cluster_sim[i][j] = cluster_distance(cluster_vectors[i], sb_result[sent_list.index(bfnsp_cluster_sentence[i][0][0])], cluster_vectors[j], sb_result[sent_list.index(bfnsp_cluster_sentence[j][0][0])])
-
-    second_clusters = dbscan(cluster_sim, DBSCAN_EPSILON_2, DBSCAN_MINPOINT_2)
-
     return
     
 
