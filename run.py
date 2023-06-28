@@ -13,13 +13,12 @@ from helpers.distances import *
 from helpers.DateParser import DateParser as DP
 from helpers.helpers import *
 from IO.HeidelTimeRW import HeideltimeRW as HRW
+from clustering.NumberClusterFinder import NumberClusterFinder
 
 def extract_sentences(doc_list):
     result = []
     for i in range(len(doc_list)):
         doc_ht = ht(doc_list[i].text, date=doc_list[i].date)
-        HRW.write_one_file(doc_ht, doc_list[i].path, doc_list[i].id)
-        tp = HRW.read_all()
         for j in range(len(doc_ht)):
             try:
                 xml_tree = ET.fromstring(doc_ht[j])
@@ -35,7 +34,7 @@ def extract_sentences(doc_list):
     return result
 
 def main():
-    doc_list = DocumentReader(INPUT_PATH, parent_dir_as_date=True).read_all()
+    doc_list = DocumentReader(INPUT_PATH, parent_dir_as_date=False).read_all()
     print(len(doc_list))
     sent_list = extract_sentences(doc_list)
 
@@ -56,7 +55,10 @@ def main():
         tmp.append(sorted_dist[i][len(sorted_dist)-4:len(sorted_dist)])
         sorted_dist[i] = tmp
         
-    clusters = dbscan(dist, DBSCAN_EPSILON, DBSCAN_MINPOINT)
+    eps = NumberClusterFinder(sb_result)
+    eps.generateDistance()
+    eps.find()
+    clusters = dbscan(dist, eps.eps, DBSCAN_MINPOINT_1)
     
     clustered_sentences = cluster_inp_list(sent_list, clusters.labels, len(clusters.clusters))
 
@@ -95,6 +97,15 @@ def main():
         for j in range(len(clustered_sentences[i])):
             cluster_vectors[i][clustered_sentences[i][j].doc_id] += 1
     
+    cluster_sim = np.zeros((len(cluster_vectors), len(cluster_vectors)))
+    for i in range(len(cluster_vectors)) :
+        for j in range(len(cluster_vectors)):    
+            cluster_sim[i][j] = cluster_distance(cluster_vectors[i], sb_result[sent_list.index(bfnsp_cluster_sentence[i][0][0])], cluster_vectors[j], sb_result[sent_list.index(bfnsp_cluster_sentence[j][0][0])])
+
+    eps2 = NumberClusterFinder(cluster_vectors)
+    eps2.generateDistance()
+    eps2.find()
+    second_clusters = dbscan(cluster_sim, eps2.eps, DBSCAN_MINPOINT_2)
     return
     
 
