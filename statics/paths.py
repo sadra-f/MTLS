@@ -5,9 +5,9 @@
 
 
 STR_INPUT_PATH = 'test_io/input.txt'
-STR_DATASET_PATH = 'dataset/mtl_dataset/L3/D1'
+STR_DATASET_PATH = 'dataset/mtl_dataset/L2/D3'
 STR_SENT_LIST_PATH= 'log/SENTENCES/'
-STR_HT_LOG_PATH = 'C:/Users/TOP/Desktop/project/mtl_dataset_HT/mtl_dataset/L3/D1'
+STR_HT_LOG_PATH = 'C:/Users/TOP/Desktop/project/mtl_dataset_HT/mtl_dataset/L2/D3'
 STR_SENTENCE_BERT_VECTORS_PATH = 'log/SENTENCE_BERT_VECTORS/'
 STR_CLUSTER1_DIST_PATH = 'log/DIST1/'
 STR_SENTENCE_CLUSTERS_PATH = 'log/CLUSTERS1/'
