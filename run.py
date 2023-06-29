@@ -14,6 +14,14 @@ from helpers.DateParser import DateParser as DP
 from helpers.helpers import *
 from IO.HeidelTimeRW import HeideltimeRW as HRW
 from clustering.NumberClusterFinder import NumberClusterFinder
+import re
+
+def check_samepath(filename1, filename2):
+    indx1 = re.search("\\\\L\d{1}\\\\", str(filename1))
+    indx2 = re.search("\\\\L\d{1}\\\\", str(filename2))
+    if filename1[indx1.span()[0]:] == filename2[indx2.span()[0]:]:
+        return True
+    return False
 
 def extract_sentences(doc_list):
     result = []
@@ -33,10 +41,37 @@ def extract_sentences(doc_list):
                 result.append(doc_list[i].text[j])
     return result
 
+
+def new_extract_sentences(doc_list, HT_list):
+    result = []
+    for i in range(len(doc_list)):
+        for j in range(len(HT_list[i].text)):
+            try:
+                # for k in re.finditer("<[^<]+>( |$|)", HT_list[i].text[j]):
+                #     HT_list[i].text[j] = (HT_list[i].text[j])[:k.span()[1]-1] + '\n' + (HT_list[i].text[j])[k.span()[1]:]
+                HT_list[i].text[j] = HT_list[i].text[j].replace('!doctype timeml system "timeml.dtd"', '!DOCTYPE TimeML SYSTEM "TimeML.dtd"')
+                HT_list[i].text[j] = HT_list[i].text[j].replace('timeml', 'TimeML')
+                HT_list[i].text[j] = HT_list[i].text[j].replace('timex3', 'TIMEX3')
+                HT_list[i].text[j] = HT_list[i].text[j].replace("\'", "")
+                HT_list[i].text[j] = HT_list[i].text[j].replace("&", "and")
+                xml_tree = ET.fromstring(HT_list[i].text[j])
+                if len(xml_tree) > 0 :
+                    for tag in xml_tree:
+                        doc_list[i].text[j].date = DP.parse(tag.attrib["value"], doc_list[i].date, DO_EXEC_LOG)
+                else:
+                    doc_list[i].text[j].date = doc_list[i].date
+            except Exception as e:
+                doc_list[i].text[j].date = doc_list[i].date
+            finally:
+                result.append(doc_list[i].text[j])
+    return result
+
 def main():
-    doc_list = DocumentReader(INPUT_PATH, parent_dir_as_date=False).read_all()
+    doc_list = DocumentReader(DATASET_PATH, parent_dir_as_date=True).read_all()
+    ht_doc_list = DocumentReader(HT_LOG_PATH, file_pattern="*.htrs",parent_dir_as_date=True).read_all()
     print(len(doc_list))
-    sent_list = extract_sentences(doc_list)
+    # sent_list = extract_sentences(doc_list)
+    sent_list = new_extract_sentences(doc_list, ht_doc_list)
 
     sb_result = sb(sent_list)
 
@@ -62,13 +97,11 @@ def main():
     
     clustered_sentences = cluster_inp_list(sent_list, clusters.labels, len(clusters.clusters))
 
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    model = BertForNextSentencePrediction.from_pretrained('bert-base-uncased')
 
     #hold sentence and bert next sentence probability
     bfnsp_cluster_sentence = []
 
-    # test keybert
+    # keybert key phrase finder
     cluster_main_phrases = doc_list_keyword_extractor(clustered_sentences)
     
     for i in range(clusters.cluster_count):
@@ -77,6 +110,8 @@ def main():
             tmp += f' {cluster_main_phrases[i][j]}'
         cluster_main_phrases[i] = tmp
 
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    model = BertForNextSentencePrediction.from_pretrained('bert-base-uncased')
     for j in range(clusters.cluster_count):
         bfnsp_cluster_sentence.append([])
         for i in range(len(clustered_sentences[j])):
