@@ -47,3 +47,6 @@ class DocumentReader:
             for path in self.file_path_list:
                 result.append(self._read_file(Path(path), self.parent_as_date))
         return result
+    
+    def reset_counter(self):
+        self._doc_counter = -1
