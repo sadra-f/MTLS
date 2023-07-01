@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 from statics.config import *
 
-def kmeans(vectorized_sentences, n_clusters):
-    return KMeans(n_clusters, n_init=80).fit(vectorized_sentences)
+def kmeans(vectorized_data, n_clusters):
+    return KMeans(n_clusters, n_init=80).fit(vectorized_data)
 
 
 
