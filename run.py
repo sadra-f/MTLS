@@ -1,10 +1,12 @@
 from statics.paths import *
 from statics.config import *
 from clustering.helpers import cluster_inp_list
+from clustering.KMeans_clustering import kmeans
 from Vector.sentence_bert import sb_vectorizer as sb
 from transformers import BertTokenizer, BertForNextSentencePrediction
 import torch
 from IO.DocumentRW import DocumentReader
+from IO.helpers import read_ground_truth
 from clustering.DBSCAN import dbscan
 from scipy.spatial.distance import euclidean
 from TimeTagger.HeidelTime_Generator import ht
@@ -15,6 +17,8 @@ from helpers.helpers import *
 from IO.HeidelTimeRW import HeideltimeRW as HRW
 from clustering.NumberClusterFinder import NumberClusterFinder
 import re
+import evaluate as eval
+
 
 def check_samepath(filename1, filename2):
     indx1 = re.search("\\\\L\d{1}\\\\", str(filename1))
@@ -107,7 +111,10 @@ def main():
     for i in range(clusters.cluster_count):
         tmp = ""
         for j in range(N_REPRESENTING_PHRASES):
-            tmp += f' {cluster_main_phrases[i][j]}'
+            try:
+                tmp += f' {cluster_main_phrases[i][j]}'
+            except IndexError as e:
+                tmp += ''
         cluster_main_phrases[i] = tmp
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
@@ -137,10 +144,33 @@ def main():
         for j in range(len(cluster_vectors)):    
             cluster_sim[i][j] = cluster_distance(cluster_vectors[i], sb_result[sent_list.index(bfnsp_cluster_sentence[i][0][0])], cluster_vectors[j], sb_result[sent_list.index(bfnsp_cluster_sentence[j][0][0])])
 
-    eps2 = NumberClusterFinder(cluster_vectors)
+    eps2 = NumberClusterFinder(cluster_sim)
     eps2.generateDistance()
     eps2.find()
-    second_clusters = dbscan(cluster_sim, eps2.eps, DBSCAN_MINPOINT_2)
+    second_clusters2 = dbscan(cluster_sim, eps2.eps, DBSCAN_MINPOINT_2)
+    second_clusters = kmeans(cluster_sim, 2)
+
+    gt = [
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L2\\D3\\groundtruth\\g1")],
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L2\\D3\\groundtruth\\g2")]
+    ]
+    timelines_clusters = []
+    timelines_clusters_sentences = []
+    for i in range(second_clusters.cluster_count):
+        timelines_clusters.append([])
+        timelines_clusters_sentences.append([])
+
+    for i in range(len(second_clusters.labels)):
+        timelines_clusters[second_clusters.labels[i]].append(i)
+        timelines_clusters_sentences[second_clusters.labels[i]].append((bfnsp_cluster_sentence[i][0][0],bfnsp_cluster_sentence[i][0][0].date))
+    rouge = eval.load('rouge')
+    # finals = rouge.compute(predictions=[i[0] for i in timelines_clusters_sentences[1]], references=["demonstrators protest in central cairo", "tunisia also lacked the oil resources of other arab states"])
+    for i in range(second_clusters.cluster_count):
+        for j in range(len(gt)):
+            prd = [i[0] for i in timelines_clusters_sentences[i]]
+            size = len(prd) if len(prd) < len(gt[j]) else len(gt[j])
+            metrics = rouge.compute(predictions=prd[:size], references=gt[j][:size])
+            print(f'generated({i}) GT({j}) ==> ', metrics)
     return
     
 
