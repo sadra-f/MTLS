@@ -38,5 +38,3 @@ def read_ground_truth(dir:Path): # returns a list of date,text tuples
             continue
     
     return res
-
-read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L1\\D1\\groundtruth\\g")
