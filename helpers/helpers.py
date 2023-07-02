@@ -25,3 +25,18 @@ def doc_list_keyword_extractor(doc_list:list) -> list[str]:
         phrase_tuple_list = keyword_extractor(tmp_str)
         res.append([phrase_tuple_list[i][0] for i in range(len(phrase_tuple_list))])
     return res
+
+def half_matrix_to_full(matrix, dims, diagonal):
+    for i in range(dims):
+        j = i + 1
+        matrix[i][j] = diagonal
+        while j < dims:
+            matrix[i][j] = matrix[j][i]
+            j+= 1
+
+def check_samepath(filename1, filename2):
+    indx1 = re.search("\\\\L\d{1}\\\\", str(filename1))
+    indx2 = re.search("\\\\L\d{1}\\\\", str(filename2))
+    if filename1[indx1.span()[0]:] == filename2[indx2.span()[0]:]:
+        return True
+    return False
