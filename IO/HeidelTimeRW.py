@@ -1,4 +1,4 @@
-from statics.paths import HT_LOG_PATH
+from statics.paths import READY_HT_PATH
 from statics.config import DO_EXEC_LOG
 import sys
 from datetime import datetime
@@ -8,7 +8,7 @@ from datetime import date as Date
 
 
 class HeideltimeRW:
-    path = HT_LOG_PATH
+    path = READY_HT_PATH
     FILE_PATTERN = "*.txt"
     def __init__(self):
         pass
