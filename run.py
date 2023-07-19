@@ -7,6 +7,8 @@ from transformers import BertTokenizer, BertForNextSentencePrediction
 import torch
 from IO.DocumentRW import DocumentReader
 from IO.helpers import read_ground_truth
+from IO.Read import read_np_array
+from IO.Write import write_np_array
 from clustering.DBSCAN import dbscan
 from scipy.spatial.distance import euclidean
 from TimeTagger.HeidelTime_Generator import ht
@@ -18,93 +20,93 @@ from IO.HeidelTimeRW import HeideltimeRW as HRW
 from clustering.NumberClusterFinder import NumberClusterFinder
 import re
 import evaluate as eval
+import datetime
+import numpy as np
+from pyclustering.cluster.kmeans import kmeans as km
+from pyclustering.utils.metric import distance_metric, type_metric
+
+READ_DIST_FROM_LOG = True
+READ_SORTED_DIST_FROM_LOG = True
 
 
-def check_samepath(filename1, filename2):
-    indx1 = re.search("\\\\L\d{1}\\\\", str(filename1))
-    indx2 = re.search("\\\\L\d{1}\\\\", str(filename2))
-    if filename1[indx1.span()[0]:] == filename2[indx2.span()[0]:]:
-        return True
-    return False
-
-def extract_sentences(doc_list):
-    result = []
-    for i in range(len(doc_list)):
-        doc_ht = ht(doc_list[i].text, date=doc_list[i].date)
-        for j in range(len(doc_ht)):
-            try:
-                xml_tree = ET.fromstring(doc_ht[j])
-                if len(xml_tree) > 0 :
-                    for tag in xml_tree:
-                        doc_list[i].text[j].date = DP.parse(tag.attrib["value"], doc_list[i].date, DO_EXEC_LOG)
-                else:
-                    doc_list[i].text[j].date = doc_list[i].date
-            except Exception as e:
-                doc_list[i].text[j].date = doc_list[i].date
-            finally:
-                result.append(doc_list[i].text[j])
-    return result
-
-
-def new_extract_sentences(doc_list, HT_list):
-    result = []
-    for i in range(len(doc_list)):
-        for j in range(len(HT_list[i].text)):
-            try:
-                # for k in re.finditer("<[^<]+>( |$|)", HT_list[i].text[j]):
-                #     HT_list[i].text[j] = (HT_list[i].text[j])[:k.span()[1]-1] + '\n' + (HT_list[i].text[j])[k.span()[1]:]
-                HT_list[i].text[j] = HT_list[i].text[j].replace('!doctype timeml system "timeml.dtd"', '!DOCTYPE TimeML SYSTEM "TimeML.dtd"')
-                HT_list[i].text[j] = HT_list[i].text[j].replace('timeml', 'TimeML')
-                HT_list[i].text[j] = HT_list[i].text[j].replace('timex3', 'TIMEX3')
-                HT_list[i].text[j] = HT_list[i].text[j].replace("\'", "")
-                HT_list[i].text[j] = HT_list[i].text[j].replace("&", "and")
-                xml_tree = ET.fromstring(HT_list[i].text[j])
-                if len(xml_tree) > 0 :
-                    for tag in xml_tree:
-                        doc_list[i].text[j].date = DP.parse(tag.attrib["value"], doc_list[i].date, DO_EXEC_LOG)
-                else:
-                    doc_list[i].text[j].date = doc_list[i].date
-            except Exception as e:
-                doc_list[i].text[j].date = doc_list[i].date
-            finally:
-                result.append(doc_list[i].text[j])
-    return result
+def test(a, b):
+    print('!')
+    return 0.5
 
 def main():
+    from sklearn.metrics import pairwise_distances
+    
+    t1 = np.random.random((27000, 400))
+    t2 = np.ones((27000,1))
+    # t3 = np.ndarray(27000, dtype=tuple)
+
+    
+    dist_metric = distance_metric(metric_type=type_metric.USER_DEFINED, func=test)
+    clstrr = km(t1, [t1[0], t1[1], t1[2]], metric=dist_metric)
+    clstrr.process()
+    
+
+    # for i in range(len(t1)):
+    #     t3[i] = (t1[i], t2[i])
+    # 
+    # # res[0] = pairwise_distances(t2.reshape(-1,1), metric=test)
+    # res = pairwise_distances(t3, t3, metric=test)
+    # 
+    # print()
+
+    
     doc_list = DocumentReader(DATASET_PATH, parent_dir_as_date=True).read_all()
-    ht_doc_list = DocumentReader(HT_LOG_PATH, file_pattern="*.htrs",parent_dir_as_date=True).read_all()
+    ht_doc_list = DocumentReader(READY_HT_PATH, file_pattern="*.htrs",parent_dir_as_date=True).read_all()
     print(len(doc_list))
-    # sent_list = extract_sentences(doc_list)
     sent_list = new_extract_sentences(doc_list, ht_doc_list)
-
+    
     sb_result = sb(sent_list)
+    
+    if not READ_DIST_FROM_LOG:
+        dist = np.zeros((len(sent_list), len(sent_list)))
+        for i in range(len(sent_list)):
+            sent_list[i].id = i
+            sent_list[i].vector = sb_result[i]
+            for j in range(i):
+                dist[i][j] = sentence_distance(sb_result[i], sent_list[i].date, sb_result[j], sent_list[j].date)
+                dist[j][i] = dist[i][j]
+        # write_np_array(dist, CLUSTER1_DIST_PATH)
+    else:
+        dist = read_np_array(CLUSTER1_DIST_PATH)
+        for i in range(len(sent_list)):
+            sent_list[i].id = i
+            sent_list[i].vector = sb_result[i]
+    
+    
+    
+    
 
-    dist = []
-    for i in range(len(sent_list)):
-        dist.append([])
-        sent_list[i].id = i
-        sent_list[i].vector = sb_result[i]
-        for j in range(len(sent_list)):
-            dist[i].append(sentence_distance(sb_result[i], sent_list[i].date, sb_result[j], sent_list[j].date))
-
-    #find smallest/largest distances
-    sorted_dist = sort_dist(dist)
+    if READ_SORTED_DIST_FROM_LOG:
+        sorted_dist = read_np_array(CLUSTER1_SORTED_DIST_PATH)
+    else:
+        dist.sort(axis=1)
+        sorted_dist = np.flip(dist, axis=1)
+    # write_np_array(sorted_dist, CLUSTER1_SORTED_DIST_PATH)
+    
+    
     for  i in range(len(sorted_dist)):
         tmp = sorted_dist[i][1:4]
         tmp.append(sorted_dist[i][len(sorted_dist)-4:len(sorted_dist)])
         sorted_dist[i] = tmp
-        
+     
+
     eps = NumberClusterFinder(sb_result)
     eps.generateDistance()
     eps.find()
     clusters = dbscan(dist, eps.eps, DBSCAN_MINPOINT_1)
     
+     
     clustered_sentences = cluster_inp_list(sent_list, clusters.labels, len(clusters.clusters))
 
 
     #hold sentence and bert next sentence probability
     bfnsp_cluster_sentence = []
-
+    
     # keybert key phrase finder
     cluster_main_phrases = doc_list_keyword_extractor(clustered_sentences)
     
@@ -116,6 +118,7 @@ def main():
             except IndexError as e:
                 tmp += ''
         cluster_main_phrases[i] = tmp
+    
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     model = BertForNextSentencePrediction.from_pretrained('bert-base-uncased')
@@ -127,6 +130,7 @@ def main():
             outputs = model(**inputs, labels=labels)
 
             bfnsp_cluster_sentence[j].append((clustered_sentences[j][i], outputs.logits[0][0].item()))
+    
 
     for i in range(clusters.cluster_count):
         bfnsp_cluster_sentence[i] = sorted(bfnsp_cluster_sentence[i], key=lambda x: x[1], reverse=True)
@@ -134,21 +138,25 @@ def main():
 
     #build cluster vectors of document percentages
     cluster_vectors = np.zeros((clusters.cluster_count, len(doc_list)))
+    
 
     for i in range(clusters.cluster_count):
         for j in range(len(clustered_sentences[i])):
             cluster_vectors[i][clustered_sentences[i][j].doc_id] += 1
-    
+      
+
     cluster_sim = np.zeros((len(cluster_vectors), len(cluster_vectors)))
     for i in range(len(cluster_vectors)) :
         for j in range(len(cluster_vectors)):    
             cluster_sim[i][j] = cluster_distance(cluster_vectors[i], sb_result[sent_list.index(bfnsp_cluster_sentence[i][0][0])], cluster_vectors[j], sb_result[sent_list.index(bfnsp_cluster_sentence[j][0][0])])
+    
 
     eps2 = NumberClusterFinder(cluster_sim)
     eps2.generateDistance()
     eps2.find()
     second_clusters2 = dbscan(cluster_sim, eps2.eps, DBSCAN_MINPOINT_2)
     second_clusters = kmeans(cluster_sim, 2)
+    
 
     gt = [
         [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L2\\D3\\groundtruth\\g1")],
@@ -159,18 +167,33 @@ def main():
     for i in range(second_clusters.cluster_count):
         timelines_clusters.append([])
         timelines_clusters_sentences.append([])
+    
 
     for i in range(len(second_clusters.labels)):
         timelines_clusters[second_clusters.labels[i]].append(i)
         timelines_clusters_sentences[second_clusters.labels[i]].append((bfnsp_cluster_sentence[i][0][0],bfnsp_cluster_sentence[i][0][0].date))
+        try:
+            timelines_clusters_sentences[second_clusters.labels[i]].append((bfnsp_cluster_sentence[i][1][0],bfnsp_cluster_sentence[i][1][0].date))    
+        except:
+            continue
     rouge = eval.load('rouge')
     # finals = rouge.compute(predictions=[i[0] for i in timelines_clusters_sentences[1]], references=["demonstrators protest in central cairo", "tunisia also lacked the oil resources of other arab states"])
+        
     for i in range(second_clusters.cluster_count):
         for j in range(len(gt)):
             prd = [i[0] for i in timelines_clusters_sentences[i]]
             size = len(prd) if len(prd) < len(gt[j]) else len(gt[j])
-            metrics = rouge.compute(predictions=prd[:size], references=gt[j][:size])
-            print(f'generated({i}) GT({j}) ==> ', metrics)
+            metrics11 = rouge.compute(predictions=prd[:size], references=gt[j][:size])
+            metrics12 = rouge.compute(predictions=[prd], references=[gt[j]])
+            print(f'generated({i}) GT({j}) ==> ', metrics11)
+            print(f'generated({i}) GT({j}) ==> ', metrics12)
+            try:
+                metrics21 = rouge.compute(predictions=prd[:size], references=gt[j][:size])
+                metrics22 = rouge.compute(predictions=[prd], references=[gt[j]])
+                print(f'generated({i}) GT({j}) ==> ', metrics21)
+                print(f'generated({i}) GT({j}) ==> ', metrics22)
+            except:
+                continue
     return
     
 
