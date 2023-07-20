@@ -46,3 +46,11 @@ def cluster_distance(cluster_vector_1:ndarray, sent1, cluster_vector_2:ndarray, 
         returns the distance between document vector of two clusters and the vector for the representing sentence of the cluster (float)
     """
     return CLUSTER_DISTANCE_CONST * cosine_distance(sent1, sent2) + (1 - CLUSTER_DISTANCE_CONST) * cosine_distance(cluster_vector_1, cluster_vector_2)
+
+def custom_sentence_distance(sentence_data_1:ndarray, sentence_data_2:ndarray):
+    """
+        input tuple/list having first elemnt being sentence vector and second elemnt be date
+        
+        returns the distance between senteces considering their vectorized representation and the date they refer to (float)
+    """
+    return sentence_distance(sentence_data_1[0], sentence_data_1[1], sentence_data_2[0], sentence_data_2[1])
