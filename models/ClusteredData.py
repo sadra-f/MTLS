@@ -1,8 +1,12 @@
 class ClusteredData:
      def __init__(self, labels, do_count_members=False):
         self.labels = labels
-        min_cluster = labels.min()
-        max_cluster = labels.max()
+        try:
+            min_cluster = labels.min()
+            max_cluster = labels.max()
+        except:
+            min_cluster = -2
+            max_cluster = -2
         self.has_outlier = True if min_cluster < 0 else False
         self.clusters = [i for i in range(min_cluster+1 if self.has_outlier else min_cluster, max_cluster+1)]
         self.cluster_count = len(self.clusters)
