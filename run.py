@@ -1,31 +1,31 @@
 from statics.paths import *
 from statics.config import *
-from clustering.helpers import cluster_inp_list
-from clustering.KMeans_clustering import kmeans
-from Vector.sentence_bert import sb_vectorizer as sb
-from transformers import BertTokenizer, BertForNextSentencePrediction
-import torch
+
 from IO.DocumentRW import DocumentReader
 from IO.helpers import read_ground_truth
 from IO.Read import read_np_array
 from IO.Write import write_np_array
+
+from clustering.helpers import cluster_inp_list
+from clustering.KMeans_clustering import kmeans
 from clustering.DBSCAN import dbscan
-from scipy.spatial.distance import euclidean
-from TimeTagger.HeidelTime_Generator import ht
-import xml.etree.ElementTree as ET
-from helpers.distances import *
-from helpers.DateParser import DateParser as DP
-from helpers.helpers import *
-from IO.HeidelTimeRW import HeideltimeRW as HRW
 from clustering.NumberClusterFinder import NumberClusterFinder
-import re
-import evaluate as eval
+
+from helpers.distances import *
+from helpers.helpers import *
+
+from Vector.sentence_bert import sb_vectorizer as sb
+
+import torch
 import datetime
 import numpy as np
+import evaluate as eval
+
 from pyclustering.cluster.kmeans import kmeans as km
 from pyclustering.utils.metric import distance_metric, type_metric
+from transformers import BertTokenizer, BertForNextSentencePrediction
 
-READ_DIST_FROM_LOG = True
+READ_DIST_FROM_LOG = False
 READ_SORTED_DIST_FROM_LOG = True
 
 
@@ -34,18 +34,18 @@ def test(a, b):
     return 0.5
 
 def main():
-    from sklearn.metrics import pairwise_distances
     
-    t1 = np.random.random((27000, 400))
-    t2 = np.ones((27000,1))
-    # t3 = np.ndarray(27000, dtype=tuple)
+    # t1 = np.random.random((27000, 400))
+    # t2 = np.ones((27000,1))
+    # # t3 = np.ndarray(27000, dtype=tuple)
 
     
-    dist_metric = distance_metric(metric_type=type_metric.USER_DEFINED, func=test)
-    clstrr = km(t1, [t1[0], t1[1], t1[2]], metric=dist_metric)
-    clstrr.process()
+    # dist_metric = distance_metric(metric_type=type_metric.USER_DEFINED, func=test)
+    # clstrr = km(t1, [t1[0], t1[1], t1[2]], metric=dist_metric)
+    # clstrr.process()
     
 
+    # from sklearn.metrics import pairwise_distances
     # for i in range(len(t1)):
     #     t3[i] = (t1[i], t2[i])
     # 
@@ -56,24 +56,29 @@ def main():
 
     
     doc_list = DocumentReader(DATASET_PATH, parent_dir_as_date=True).read_all()
+    DOCUMENT_COUNT = len(doc_list)
     ht_doc_list = DocumentReader(READY_HT_PATH, file_pattern="*.htrs",parent_dir_as_date=True).read_all()
-    print(len(doc_list))
     sent_list = new_extract_sentences(doc_list, ht_doc_list)
+    SENTENCE_COUNT = len(sent_list)
     
     sb_result = sb(sent_list)
     
+    sb_date_tpl = np.ndarray((SENTENCE_COUNT,2), dtype=tuple)
+
     if not READ_DIST_FROM_LOG:
-        dist = np.zeros((len(sent_list), len(sent_list)))
-        for i in range(len(sent_list)):
+        dist = np.zeros((SENTENCE_COUNT, SENTENCE_COUNT))
+        for i in range(SENTENCE_COUNT):
             sent_list[i].id = i
             sent_list[i].vector = sb_result[i]
-            for j in range(i):
-                dist[i][j] = sentence_distance(sb_result[i], sent_list[i].date, sb_result[j], sent_list[j].date)
-                dist[j][i] = dist[i][j]
+            sb_date_tpl[i][0] = sb_result[i]
+            sb_date_tpl[i][1] = sent_list[i].date
+            # for j in range(i):
+            #     dist[i][j] = sentence_distance(sb_result[i], sent_list[i].date, sb_result[j], sent_list[j].date)
+            #     dist[j][i] = dist[i][j]
         # write_np_array(dist, CLUSTER1_DIST_PATH)
     else:
         dist = read_np_array(CLUSTER1_DIST_PATH)
-        for i in range(len(sent_list)):
+        for i in range(SENTENCE_COUNT):
             sent_list[i].id = i
             sent_list[i].vector = sb_result[i]
     
@@ -101,7 +106,7 @@ def main():
     clusters = dbscan(dist, eps.eps, DBSCAN_MINPOINT_1)
     
      
-    clustered_sentences = cluster_inp_list(sent_list, clusters.labels, len(clusters.clusters))
+    clustered_sentences = cluster_inp_list(sent_list, clusters.labels, clusters.cluster_count)
 
 
     #hold sentence and bert next sentence probability
@@ -137,7 +142,7 @@ def main():
     print(clustered_sentences)
 
     #build cluster vectors of document percentages
-    cluster_vectors = np.zeros((clusters.cluster_count, len(doc_list)))
+    cluster_vectors = np.zeros((clusters.cluster_count, DOCUMENT_COUNT))
     
 
     for i in range(clusters.cluster_count):
