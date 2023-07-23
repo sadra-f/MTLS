@@ -34,12 +34,15 @@ def cosine_similarity(vector1:ndarray, vector2:ndarray):
         returns the cosine similarity of two vectors (float)
     """
     return dot(vector1, vector2) / ( vector_length(vector1) * vector_length(vector2) )
-
 def sentence_distance(vector1:ndarray, date1:date, vector2:ndarray, date2:date):
     """
         returns the distance between senteces considering their vectorized representation and the date they refer to (float)
     """
+    
+    print(sentence_distance.cntr)
+    sentence_distance.cntr = sentence_distance.cntr + 1
     return MTLS_DISTANCE_CONST * normalized_date_diff(date1, date2) + (1 - MTLS_DISTANCE_CONST) * cosine_distance(vector1, vector2)
+sentence_distance.cntr = 0
 
 def cluster_distance(cluster_vector_1:ndarray, sent1, cluster_vector_2:ndarray, sent2):
     """
