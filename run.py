@@ -14,6 +14,8 @@ from clustering.NumberClusterFinder import NumberClusterFinder
 from helpers.distances import *
 from helpers.helpers import *
 
+from models.test import TestClass
+
 from Vector.sentence_bert import sb_vectorizer as sb
 
 import torch
@@ -25,6 +27,7 @@ from transformers import BertTokenizer, BertForNextSentencePrediction
 
 READ_DIST_FROM_LOG = False
 READ_SORTED_DIST_FROM_LOG = True
+READ_SB_FROM_LOG = True
 
 
 def main():
@@ -55,22 +58,25 @@ def main():
     sent_list = new_extract_sentences(doc_list, ht_doc_list)
     SENTENCE_COUNT = len(sent_list)
     
-    sb_result = sb(sent_list)
+    if READ_SB_FROM_LOG:
+       sb_result = read_np_array(SENTENCE_BERT_VECTORS_PATH)
+    else:
+        sb_result = sb(sent_list)
     
-    sb_date_tpl_array = np.ndarray((SENTENCE_COUNT,2), dtype=tuple)
+    sb_date_tpl_array = np.ndarray(SENTENCE_COUNT, dtype=TestClass)
 
     if not READ_DIST_FROM_LOG:
         dist = np.zeros((SENTENCE_COUNT, SENTENCE_COUNT))
         for i in range(SENTENCE_COUNT):
             sent_list[i].id = i
             sent_list[i].vector = sb_result[i]
-            sb_date_tpl_array[i][0] = sb_result[i]
-            sb_date_tpl_array[i][1] = sent_list[i].date
+            sb_date_tpl_array[i] = TestClass(sb_result[i], sent_list[i].date)
+            # sb_date_tpl_array[i].date = sent_list[i].date
             # for j in range(i):
             #     dist[i][j] = sentence_distance(sb_result[i], sent_list[i].date, sb_result[j], sent_list[j].date)
             #     dist[j][i] = dist[i][j]
         # write_np_array(dist, CLUSTER1_DIST_PATH)
-        initial_sentence_clusters = custom_kmeans(sent_list, None)
+        initial_sentence_clusters = custom_kmeans(sb_result, None)
     else:
         dist = read_np_array(CLUSTER1_DIST_PATH)
         for i in range(SENTENCE_COUNT):
