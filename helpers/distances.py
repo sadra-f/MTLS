@@ -39,7 +39,7 @@ def sentence_distance(vector1:ndarray, date1:date, vector2:ndarray, date2:date):
         returns the distance between senteces considering their vectorized representation and the date they refer to (float)
     """
     
-    print(sentence_distance.cntr)
+    # print(sentence_distance.cntr)
     sentence_distance.cntr = sentence_distance.cntr + 1
     return MTLS_DISTANCE_CONST * normalized_date_diff(date1, date2) + (1 - MTLS_DISTANCE_CONST) * cosine_distance(vector1, vector2)
 sentence_distance.cntr = 0
@@ -50,10 +50,10 @@ def cluster_distance(cluster_vector_1:ndarray, sent1, cluster_vector_2:ndarray, 
     """
     return CLUSTER_DISTANCE_CONST * cosine_distance(sent1, sent2) + (1 - CLUSTER_DISTANCE_CONST) * cosine_distance(cluster_vector_1, cluster_vector_2)
 
-def custom_sentence_distance(sentence_data_1:ndarray, sentence_data_2:ndarray):
+def custom_sentence_distance(sentence_data_1, sentence_data_2):
     """
         input tuple/list having first elemnt being sentence vector and second elemnt be date
         
         returns the distance between senteces considering their vectorized representation and the date they refer to (float)
     """
-    return sentence_distance(sentence_data_1[0], sentence_data_1[1], sentence_data_2[0], sentence_data_2[1])
+    return sentence_distance(sentence_data_1.vector, sentence_data_1.date, sentence_data_2.vector, sentence_data_2.date)
