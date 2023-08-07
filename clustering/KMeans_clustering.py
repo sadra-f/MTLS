@@ -43,8 +43,8 @@ class CustomKMeans:
 
     def process(self):
         for i in range(self.step_count):
-            self._run_one_cycle(self)
-            self._find_new_centroids(self)
+            self._run_one_cycle()
+            self._find_new_centroids()
 
 
     def _run_one_cycle(self):
@@ -54,6 +54,7 @@ class CustomKMeans:
             self.labels[i] = np.argmax(self._current_distances.take(i, 0))
 
     def _find_new_centroids(self):
+        self._calc_means()
         pass
 
     def _calc_means(self):
