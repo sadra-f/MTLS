@@ -39,7 +39,7 @@ class CustomKMeans:
         self._current_distances = np.full(self._shape, np.inf)
         self._dist_func = distance_function
 
-        self.labels = np.full((len(data), 1), -1)
+        self.labels = np.full(len(data), -1)
 
     def process(self):
         for i in range(self.step_count):
