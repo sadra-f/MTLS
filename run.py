@@ -7,7 +7,7 @@ from IO.Read import read_np_array
 from IO.Write import write_np_array
 
 from clustering.helpers import cluster_inp_list
-from clustering.KMeans_clustering import normal_kmeans, custom_kmeans
+from clustering.KMeans_clustering import normal_kmeans, CustomKMeans as KMeans
 from clustering.DBSCAN import dbscan
 from clustering.NumberClusterFinder import NumberClusterFinder
 
@@ -15,6 +15,7 @@ from helpers.distances import *
 from helpers.helpers import *
 
 from models.test import TestClass
+from models.ClusteredData import ClusteredData
 
 from Vector.sentence_bert import sb_vectorizer as sb
 
@@ -63,20 +64,15 @@ def main():
     else:
         sb_result = sb(sent_list)
     
-    sb_date_tpl_array = np.ndarray(SENTENCE_COUNT, dtype=TestClass)
+    # sb_date_tpl_array = np.ndarray(SENTENCE_COUNT, dtype=TestClass)
 
     if not READ_DIST_FROM_LOG:
         dist = np.zeros((SENTENCE_COUNT, SENTENCE_COUNT))
         for i in range(SENTENCE_COUNT):
             sent_list[i].id = i
             sent_list[i].vector = sb_result[i]
-            sb_date_tpl_array[i] = TestClass(sb_result[i], sent_list[i].date)
-            # sb_date_tpl_array[i].date = sent_list[i].date
-            # for j in range(i):
-            #     dist[i][j] = sentence_distance(sb_result[i], sent_list[i].date, sb_result[j], sent_list[j].date)
-            #     dist[j][i] = dist[i][j]
         # write_np_array(dist, CLUSTER1_DIST_PATH)
-        initial_sentence_clusters = custom_kmeans(sb_result, None)
+        initial_sentence_clusters = ClusteredData(KMeans(sent_list, 10, 1).process().labels)
     else:
         dist = read_np_array(CLUSTER1_DIST_PATH)
         for i in range(SENTENCE_COUNT):
