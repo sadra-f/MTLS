@@ -1,5 +1,6 @@
+import numpy as np
 class ClusteredData:
-     def __init__(self, labels, do_count_members=False):
+     def __init__(self, labels, do_count_members=False, seperate=True):
         self.labels = labels
         try:
             min_cluster = labels.min()
@@ -18,3 +19,8 @@ class ClusteredData:
                     self.outlier_count += 1
                 else:
                     self.cluster_member_count[labels[i]] += 1
+        if seperate:
+            seperated = []
+            for i in range(self.labels):
+                seperated[self.labels[i]].append(i)
+            self.seperated = np.array(seperated)
