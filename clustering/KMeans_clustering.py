@@ -8,7 +8,7 @@ from pyclustering.utils.metric import distance_metric, type_metric
 from models.TStr import TStr
 from models.ClusteredData import ClusteredData
 
-from ..helpers.distances import custom_sentence_distance
+from helpers.distances import custom_sentence_distance
 
 def normal_kmeans(vectorized_data, n_clusters):
     res =  KMeans(n_clusters, n_init=80).fit(vectorized_data)
@@ -45,6 +45,7 @@ class CustomKMeans:
         for i in range(self.step_count):
             self._run_one_cycle()
             self._find_new_centroids()
+        return self
 
 
     def _run_one_cycle(self):
