@@ -21,6 +21,6 @@ class ClusteredData:
                     self.cluster_member_count[labels[i]] += 1
         if seperate:
             seperated = []
-            for i in range(self.labels):
+            for i in range(len(self.labels)):
                 seperated[self.labels[i]].append(i)
             self.seperated = np.array(seperated)
