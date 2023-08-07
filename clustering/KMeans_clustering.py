@@ -35,7 +35,7 @@ class CustomKMeans:
         else:
             self.centeroids = initial_centers
         self.step_count = step_count
-        self._shape = (len(data), len(initial_centers))
+        self._shape = (len(data), len(self.centeroids))
         self._current_distances = np.full(self._shape, np.inf)
         self._dist_func = distance_function
 
