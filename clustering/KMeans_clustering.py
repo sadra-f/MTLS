@@ -31,9 +31,9 @@ class CustomKMeans:
     def __init__(self, data:list[TStr], initial_centers, step_count, distance_function=custom_sentence_distance, label_wrapper=None):
         self.data = data
         if type(initial_centers) is int:
-            self.initial_centers = [data[random.randint(0, len(data))] for k in range(initial_centers)]
+            self.centeroids = [data[random.randint(0, len(data))] for k in range(initial_centers)]
         else:
-            self.initial_centers = initial_centers
+            self.centeroids = initial_centers
         self.step_count = step_count
         self._shape = (len(data), len(initial_centers))
         self._current_distances = np.full(self._shape, np.inf)
@@ -42,18 +42,22 @@ class CustomKMeans:
         self.labels = np.full((len(data), 1), -1)
 
     def process(self):
-        self._run_one_cycle(self)
+        for i in range(self.step_count):
+            self._run_one_cycle(self)
+            self._find_new_centroids(self)
+
 
     def _run_one_cycle(self):
         for i in range(self._shape[0]):
             for j in range(self._shape[1]):
-                self._current_distances[i, j] = self._dist_func(self.data[i], self.initial_centers[j])                
-        self.labels[i] = np.argmax(self._current_distances.take(i, 0))
+                self._current_distances[i, j] = self._dist_func(self.data[i], self.centeroids[j])                
+            self.labels[i] = np.argmax(self._current_distances.take(i, 0))
 
     def _find_new_centroids(self):
         pass
 
-
+    def _calc_means(self):
+        pass
 
 
 
