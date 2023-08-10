@@ -96,7 +96,7 @@ def new_extract_sentences(doc_list, HT_list):
                 result.append(doc_list[i].text[j])
     return result
 
-class compress:
+class Compress:
 
     def vector_compressor(vector, compress=np.inf):
         """
@@ -139,7 +139,7 @@ class compress:
     def matrix_compressor(matrix, compress=np.inf):
         res = []
         for i , vec in enumerate(matrix):
-            res.append(vector_compressor(vec, compress))
+            res.append(Compress.vector_compressor(vec, compress))
         return np.array(res, dtype=object)
 
 
@@ -163,5 +163,5 @@ class compress:
     def matrix_decompressor(compressed_matrix, replace_with=np.inf, final_type=np.float64):
         res = []
         for i, vector in enumerate(compressed_matrix):
-            res.append(vector_decompressor(vector, replace_with, final_type))
+            res.append(Compress.vector_decompressor(vector, replace_with, final_type))
         return np.array(res, dtype=final_type)
