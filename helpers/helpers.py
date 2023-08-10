@@ -108,23 +108,23 @@ def array_compressor(array, compress=np.inf, mark=np.NAN):
         ================================================================
 
         compress: the value we want to have replaced with its number of occurrences
-        mark: the marker value to use which is not of the normal data type, type to know a counter has been reached
+        mark: the marker value to use which is not of the array data type, type to know a counter has been reached
 
     """
     res = [len(array)]
     counter = 0
     for i, value in enumerate(array):
-        if value == np.inf:
+        if value == compress:
             counter += 1
             continue
         elif counter > 2:
-            res.append(np.NAN)
+            res.append(mark)
             res.append(counter)
         elif counter == 2:
-            res.append(np.inf)
-            res.append(np.inf)
+            res.append(compress)
+            res.append(compress)
         elif counter == 1:
-            res.append(np.inf)
+            res.append(compress)
         res.append(value)
         counter = 0
     return np.array(res, dtype=np.float64)
