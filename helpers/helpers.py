@@ -97,7 +97,7 @@ def new_extract_sentences(doc_list, HT_list):
     return result
 
 
-def array_compressor(array, compress=np.inf, mark=np.NAN):
+def vector_compressor(array, compress=np.inf, mark=np.NAN):
     """
         read through the array and convert multiple consecutive occurrences of np.inf into counters of it
         example:
@@ -128,3 +128,4 @@ def array_compressor(array, compress=np.inf, mark=np.NAN):
         res.append(value)
         counter = 0
     return res
+
