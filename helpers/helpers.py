@@ -98,6 +98,13 @@ def new_extract_sentences(doc_list, HT_list):
 
 
 def array_compressor(array):
+    """
+        read through the array and convert multiple consecutive occurrences of np.inf into counters of it
+        example:
+            inf, inf, inf, inf, inf, 0.2, 0,3, inf, 0.5
+        will be:
+            nan, 5, 0.2, 0.3, inf, 0.5
+    """
     res = [len(array)]
     counter = 0
     for i, value in enumerate(array):
@@ -107,9 +114,11 @@ def array_compressor(array):
         elif counter > 2:
             res.append(np.NAN)
             res.append(counter)
-            counter = 0
-        else:
+        elif counter == 2:
             res.append(np.inf)
+            res.append(np.inf)
+        elif counter == 1:
             res.append(np.inf)
         res.append(value)
+        counter = 0
     return np.array(res, dtype=np.float64)
