@@ -23,11 +23,11 @@ import torch
 import datetime
 import numpy as np
 import evaluate as eval
-
+from itertools import combinations
 from transformers import BertTokenizer, BertForNextSentencePrediction
 
-READ_DIST_FROM_LOG = False
-READ_SORTED_DIST_FROM_LOG = True
+READ_DIST_FROM_LOG = True
+READ_SORTED_DIST_FROM_LOG = False
 READ_SB_FROM_LOG = True
 
 
@@ -60,25 +60,28 @@ def main():
     SENTENCE_COUNT = len(sent_list)
     
     if READ_SB_FROM_LOG:
-       sb_result = read_np_array(SENTENCE_BERT_VECTORS_PATH)
+        sb_result = read_np_array(SENTENCE_BERT_VECTORS_PATH)
     else:
         sb_result = sb(sent_list)
     
-    # sb_date_tpl_array = np.ndarray(SENTENCE_COUNT, dtype=TestClass)
+    print(datetime.datetime.now())
+    for i, bert in enumerate(sb_result):
+        sent_list[i].id = i
+        sent_list[i].vector = bert
 
     if not READ_DIST_FROM_LOG:
-        dist = np.zeros((SENTENCE_COUNT, SENTENCE_COUNT))
-        for i in range(SENTENCE_COUNT):
-            sent_list[i].id = i
-            sent_list[i].vector = sb_result[i]
-        # write_np_array(dist, CLUSTER1_DIST_PATH)
+        dist = np.full((SENTENCE_COUNT, SENTENCE_COUNT), np.inf)
+        print(datetime.datetime.now())
         initial_sentence_clusters = ClusteredData(KMeans(sent_list, 10, 1).process().labels)
+        for cluster in initial_sentence_clusters.seperated:
+            print(datetime.datetime.now())
+            for j, k in combinations(cluster, 2):
+                    dist[j][k] = dist[k][j] = sentence_distance(sent_list[j], sent_list[k])
+        # write_np_array(dist, CLUSTER1_DIST_PATH)
+
     else:
         dist = read_np_array(CLUSTER1_DIST_PATH)
-        for i in range(SENTENCE_COUNT):
-            sent_list[i].id = i
-            sent_list[i].vector = sb_result[i]    
-    
+ 
 
     if READ_SORTED_DIST_FROM_LOG:
         sorted_dist = read_np_array(CLUSTER1_SORTED_DIST_PATH)
@@ -87,11 +90,11 @@ def main():
         sorted_dist = np.flip(dist, axis=1)
     # write_np_array(sorted_dist, CLUSTER1_SORTED_DIST_PATH)
     
-    
-    for  i in range(len(sorted_dist)):
-        tmp = sorted_dist[i][1:4]
-        tmp.append(sorted_dist[i][len(sorted_dist)-4:len(sorted_dist)])
-        sorted_dist[i] = tmp
+    # I HAVE NO IDEA WHY I HAVE THIS BIT OF CODE AND WHY I HAVENT DELETED IT
+    # for  i in range(len(sorted_dist)):
+    #     tmp = sorted_dist[i][1:4]
+    #     tmp.append(sorted_dist[i][len(sorted_dist)-4:len(sorted_dist)])
+    #     sorted_dist[i] = tmp
      
 
     eps = NumberClusterFinder(sb_result)
