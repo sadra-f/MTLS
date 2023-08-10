@@ -135,27 +135,32 @@ def vector_compressor(vector, compress=np.inf):
     return np.array(res, dtype=np.float64)
 
 
-def matrix_compressor(matrix, compress=np.inf, mark=np.NAN):
+def matrix_compressor(matrix, compress=np.inf):
     res = []
     for i , vec in enumerate(matrix):
-        res.append(vector_compressor(vec, compress, mark))
+        res.append(vector_compressor(vec, compress))
     return np.array(res, dtype=object)
 
 
-def vector_decompressor(vector, replace_with=np.inf, final_type=np.float64):
-    sum = 0
+def vector_decompressor(compressed_vector, replace_with=np.inf, final_type=np.float64):
     res = []
     found_mark = False
-    for i in range(1, len(vector)):
+    for i in range(1, len(compressed_vector)):
         if found_mark:
             found_mark = False
             continue
-        if np.isnan(vector[i]):
+        if np.isnan(compressed_vector[i]):
             found_mark = True
-            count = int(vector[i+1])
-            sum += count
+            count = int(compressed_vector[i+1])
             for j in range(count):
                 res.append(replace_with)
         else:
-            res.append(vector[i])
+            res.append(compressed_vector[i])
+    return np.array(res, dtype=final_type)
+
+
+def matrix_decompressor(compressed_matrix, replace_with=np.inf, final_type=np.float64):
+    res = []
+    for i, vector in enumerate(compressed_matrix):
+        res.append(vector_decompressor(vector, replace_with, final_type))
     return np.array(res, dtype=final_type)
