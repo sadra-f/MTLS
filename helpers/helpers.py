@@ -127,4 +127,4 @@ def array_compressor(array, compress=np.inf, mark=np.NAN):
             res.append(compress)
         res.append(value)
         counter = 0
-    return np.array(res, dtype=np.float64)
+    return res
