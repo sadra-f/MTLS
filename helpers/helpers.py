@@ -9,6 +9,7 @@ from TimeTagger.HeidelTime_Generator import ht
 import xml.etree.ElementTree as ET
 from keybert import KeyBERT
 import re
+import numpy as np
 
 def sort_dist(dist:list):
     res = []
@@ -94,3 +95,21 @@ def new_extract_sentences(doc_list, HT_list):
             finally:
                 result.append(doc_list[i].text[j])
     return result
+
+
+def array_compressor(array):
+    res = [len(array)]
+    counter = 0
+    for i, value in enumerate(array):
+        if value == np.inf:
+            counter += 1
+            continue
+        elif counter > 2:
+            res.append(np.NAN)
+            res.append(counter)
+            counter = 0
+        else:
+            res.append(np.inf)
+            res.append(np.inf)
+        res.append(value)
+    return np.array(res, dtype=np.float64)
