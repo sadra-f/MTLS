@@ -96,71 +96,72 @@ def new_extract_sentences(doc_list, HT_list):
                 result.append(doc_list[i].text[j])
     return result
 
+class compress:
 
-def vector_compressor(vector, compress=np.inf):
-    """
-        read through the vector and convert multiple consecutive occurrences of np.inf into counters of it
-        example:
-            inf, inf, inf, inf, inf, 0.2, 0,3, inf, 0.5
-        will be:
-            nan, 5, 0.2, 0.3, inf, 0.5
+    def vector_compressor(vector, compress=np.inf):
+        """
+            read through the vector and convert multiple consecutive occurrences of np.inf into counters of it
+            example:
+                inf, inf, inf, inf, inf, 0.2, 0,3, inf, 0.5
+            will be:
+                nan, 5, 0.2, 0.3, inf, 0.5
 
-        ================================================================
+            ================================================================
 
-        compress: the value we want to have replaced with its number of occurrences
-        mark: the marker value to use which is not of the vector data type, type to know a counter has been reached
+            compress: the value we want to have replaced with its number of occurrences
+            mark: the marker value to use which is not of the vector data type, type to know a counter has been reached
 
-    """
-    res = [len(vector)]
-    counter = 0
-    for i, value in enumerate(vector):
-        if value == compress:
-            counter += 1
-            continue
-        elif counter > 2:
+        """
+        res = [len(vector)]
+        counter = 0
+        for i, value in enumerate(vector):
+            if value == compress:
+                counter += 1
+                continue
+            elif counter > 2:
+                res.append(np.NAN)
+                res.append(counter)
+            elif counter == 2:
+                res.append(compress)
+                res.append(compress)
+            elif counter == 1:
+                res.append(compress)
+            res.append(value)
+            counter = 0
+        # so that if the vector ends in compress values, they wouldn't be lost
+        if counter > 0:
             res.append(np.NAN)
             res.append(counter)
-        elif counter == 2:
-            res.append(compress)
-            res.append(compress)
-        elif counter == 1:
-            res.append(compress)
-        res.append(value)
-        counter = 0
-    # so that if the vector ends in compress values, they wouldn't be lost
-    if counter > 0:
-        res.append(np.NAN)
-        res.append(counter)
 
-    return np.array(res, dtype=np.float64)
+        return np.array(res, dtype=np.float64)
 
 
-def matrix_compressor(matrix, compress=np.inf):
-    res = []
-    for i , vec in enumerate(matrix):
-        res.append(vector_compressor(vec, compress))
-    return np.array(res, dtype=object)
+    def matrix_compressor(matrix, compress=np.inf):
+        res = []
+        for i , vec in enumerate(matrix):
+            res.append(vector_compressor(vec, compress))
+        return np.array(res, dtype=object)
 
 
-def vector_decompressor(compressed_vector, replace_with=np.inf, final_type=np.float64):
-    res = []
-    found_mark = False
-    for i in range(1, len(compressed_vector)):
-        if found_mark:
-            found_mark = False
-            continue
-        if np.isnan(compressed_vector[i]):
-            found_mark = True
-            count = int(compressed_vector[i+1])
-            for j in range(count):
-                res.append(replace_with)
-        else:
-            res.append(compressed_vector[i])
-    return np.array(res, dtype=final_type)
+    def vector_decompressor(compressed_vector, replace_with=np.inf, final_type=np.float64):
+        res = []
+        found_mark = False
+        for i in range(1, len(compressed_vector)):
+            if found_mark:
+                found_mark = False
+                continue
+            if np.isnan(compressed_vector[i]):
+                found_mark = True
+                count = int(compressed_vector[i+1])
+                for j in range(count):
+                    res.append(replace_with)
+            else:
+                res.append(compressed_vector[i])
+        return np.array(res, dtype=final_type)
 
 
-def matrix_decompressor(compressed_matrix, replace_with=np.inf, final_type=np.float64):
-    res = []
-    for i, vector in enumerate(compressed_matrix):
-        res.append(vector_decompressor(vector, replace_with, final_type))
-    return np.array(res, dtype=final_type)
+    def matrix_decompressor(compressed_matrix, replace_with=np.inf, final_type=np.float64):
+        res = []
+        for i, vector in enumerate(compressed_matrix):
+            res.append(vector_decompressor(vector, replace_with, final_type))
+        return np.array(res, dtype=final_type)
