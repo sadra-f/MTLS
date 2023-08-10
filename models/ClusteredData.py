@@ -25,4 +25,4 @@ class ClusteredData:
                 seperated.append([])
             for i in range(len(self.labels)):
                 seperated[self.labels[i]].append(i)
-            self.seperated = np.array(seperated)
+            self.seperated = np.array(seperated, dtype=object)
