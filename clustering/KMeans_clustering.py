@@ -8,14 +8,14 @@ from pyclustering.utils.metric import distance_metric, type_metric
 from models.TStr import TStr
 from models.ClusteredData import ClusteredData
 
-from helpers.distances import custom_sentence_distance
+from helpers.distances import sentence_distance
 
 def normal_kmeans(vectorized_data, n_clusters):
     res =  KMeans(n_clusters, n_init=80).fit(vectorized_data)
     return ClusteredData(res.labels_)
 
 def custom_kmeans(input_matrix, initial_centers=None):
-    dist_metric = distance_metric(metric_type=type_metric.USER_DEFINED, func=custom_sentence_distance)
+    dist_metric = distance_metric(metric_type=type_metric.USER_DEFINED, func=sentence_distance)
     if initial_centers is None:
         initial_centers = 10
     if type(initial_centers) is int:
@@ -28,7 +28,7 @@ def custom_kmeans(input_matrix, initial_centers=None):
 
 
 class CustomKMeans:
-    def __init__(self, data:list[TStr], initial_centers, step_count, distance_function=custom_sentence_distance, label_wrapper=None):
+    def __init__(self, data:list[TStr], initial_centers, step_count, distance_function=sentence_distance, label_wrapper=None):
         self.data = data
         if type(initial_centers) is int:
             self.centeroids = [data[random.randint(0, len(data))] for k in range(initial_centers)]
