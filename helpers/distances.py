@@ -35,7 +35,7 @@ def cosine_similarity(vector1:ndarray, vector2:ndarray):
     """
     return dot(vector1, vector2) / ( vector_length(vector1) * vector_length(vector2) )
     
-def sentence_distance(vector1:ndarray, date1:date, vector2:ndarray, date2:date):
+def _sentence_distance(vector1:ndarray, date1:date, vector2:ndarray, date2:date):
     """
         returns the distance between senteces considering their vectorized representation and the date they refer to (float)
     """
@@ -48,10 +48,10 @@ def cluster_distance(cluster_vector_1:ndarray, sent1, cluster_vector_2:ndarray, 
     """
     return CLUSTER_DISTANCE_CONST * cosine_distance(sent1, sent2) + (1 - CLUSTER_DISTANCE_CONST) * cosine_distance(cluster_vector_1, cluster_vector_2)
 
-def custom_sentence_distance(sentence_data_1, sentence_data_2):
+def sentence_distance(sentence_data_1, sentence_data_2):
     """
         input TStr object containing vector of the sentence along the date it refers to
         
         returns the distance between senteces considering their vectorized representation and the date they refer to (float)
     """
-    return sentence_distance(sentence_data_1.vector, sentence_data_1.date, sentence_data_2.vector, sentence_data_2.date)
+    return _sentence_distance(sentence_data_1.vector, sentence_data_1.date, sentence_data_2.vector, sentence_data_2.date)
