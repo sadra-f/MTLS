@@ -97,9 +97,9 @@ def new_extract_sentences(doc_list, HT_list):
     return result
 
 
-def vector_compressor(array, compress=np.inf, mark=np.NAN):
+def vector_compressor(vector, compress=np.inf):
     """
-        read through the array and convert multiple consecutive occurrences of np.inf into counters of it
+        read through the vector and convert multiple consecutive occurrences of np.inf into counters of it
         example:
             inf, inf, inf, inf, inf, 0.2, 0,3, inf, 0.5
         will be:
@@ -108,17 +108,17 @@ def vector_compressor(array, compress=np.inf, mark=np.NAN):
         ================================================================
 
         compress: the value we want to have replaced with its number of occurrences
-        mark: the marker value to use which is not of the array data type, type to know a counter has been reached
+        mark: the marker value to use which is not of the vector data type, type to know a counter has been reached
 
     """
-    res = [len(array)]
+    res = [len(vector)]
     counter = 0
-    for i, value in enumerate(array):
+    for i, value in enumerate(vector):
         if value == compress:
             counter += 1
             continue
         elif counter > 2:
-            res.append(mark)
+            res.append(np.NAN)
             res.append(counter)
         elif counter == 2:
             res.append(compress)
@@ -127,6 +127,11 @@ def vector_compressor(array, compress=np.inf, mark=np.NAN):
             res.append(compress)
         res.append(value)
         counter = 0
+    # so that if the vector ends in compress values, they wouldn't be lost
+    if counter > 0:
+        res.append(np.NAN)
+        res.append(counter)
+
     return np.array(res, dtype=np.float64)
 
 
@@ -135,3 +140,22 @@ def matrix_compressor(matrix, compress=np.inf, mark=np.NAN):
     for i , vec in enumerate(matrix):
         res.append(vector_compressor(vec, compress, mark))
     return np.array(res, dtype=object)
+
+
+def vector_decompressor(vector, replace_with=np.inf, final_type=np.float64):
+    sum = 0
+    res = []
+    found_mark = False
+    for i in range(1, len(vector)):
+        if found_mark:
+            found_mark = False
+            continue
+        if np.isnan(vector[i]):
+            found_mark = True
+            count = int(vector[i+1])
+            sum += count
+            for j in range(count):
+                res.append(replace_with)
+        else:
+            res.append(vector[i])
+    return np.array(res, dtype=final_type)
