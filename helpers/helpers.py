@@ -97,13 +97,19 @@ def new_extract_sentences(doc_list, HT_list):
     return result
 
 
-def array_compressor(array):
+def array_compressor(array, compress=np.inf, mark=np.NAN):
     """
         read through the array and convert multiple consecutive occurrences of np.inf into counters of it
         example:
             inf, inf, inf, inf, inf, 0.2, 0,3, inf, 0.5
         will be:
             nan, 5, 0.2, 0.3, inf, 0.5
+
+        ================================================================
+
+        compress: the value we want to have replaced with its number of occurrences
+        mark: the marker value to use which is not of the normal data type, type to know a counter has been reached
+
     """
     res = [len(array)]
     counter = 0
