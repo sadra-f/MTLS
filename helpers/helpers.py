@@ -127,5 +127,11 @@ def vector_compressor(array, compress=np.inf, mark=np.NAN):
             res.append(compress)
         res.append(value)
         counter = 0
-    return res
+    return np.array(res, dtype=np.float64)
 
+
+def matrix_compressor(matrix, compress=np.inf, mark=np.NAN):
+    res = []
+    for i , vec in enumerate(matrix):
+        res.append(vector_compressor(vec, compress, mark))
+    return np.array(res, dtype=object)
