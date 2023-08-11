@@ -24,8 +24,6 @@ import numpy as np
 import evaluate as eval
 from itertools import combinations
 from transformers import BertTokenizer, BertForNextSentencePrediction
-from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
 
 READ_DIST_FROM_LOG = True
 READ_SORTED_DIST_FROM_LOG = False
@@ -33,26 +31,6 @@ READ_SB_FROM_LOG = True
 
 
 def main():
-    
-    # t1 = np.random.random((27000, 400))
-    # t2 = np.ones((27000,1))
-    # t3 = np.ndarray(27000, dtype=tuple)
-
-    
-    # dist_metric = distance_metric(metric_type=type_metric.USER_DEFINED, func=test)
-    # clstrr = km(t1, [t1[0], t1[1], t1[2]], metric=dist_metric)
-    # clstrr.process()
-    
-
-    # from sklearn.metrics import pairwise_distances
-    # for i in range(len(t1)):
-    #     t3[i] = (t1[i], t2[i])
-    # 
-    # # res[0] = pairwise_distances(t2.reshape(-1,1), metric=test)
-    # res = pairwise_distances(t3, t3, metric=test)
-    # 
-    # print()
-
     
     doc_list = DocumentReader(DATASET_PATH, parent_dir_as_date=True).read_all()
     DOCUMENT_COUNT = len(doc_list)
@@ -87,21 +65,13 @@ def main():
         vec[vec == np.inf] = 100
         vec[vec < 0] = 0
         vec[i] = 0
-    # np.sort(dist, axis=1)
-    # sorted_dist = np.flip(dist, axis=1)
-    # write_np_array(sorted_dist, CLUSTER1_SORTED_DIST_PATH)
+
     nth_dist_sum = 0
     for i, val in enumerate(dist):
         nth_dist_sum += float(np.sort(val, axis=0)[DBSCAN_MINPOINT_1])
     eps = nth_dist_sum / len(dist)
-    # for  i in range(len(sorted_dist)):
-    #     tmp = sorted_dist[i][1:4]
-    #     tmp.append(sorted_dist[i][len(sorted_dist)-4:len(sorted_dist)])
-    #     sorted_dist[i] = tmp
 
-    # t = np.mean(np.sort([np.mean(i[1:6]) for i in dist]))
-    # eps = NumberClusterFinder(sb_result)
-    # eps.find()
+
     clusters = dbscan(dist, eps, 5)
     
      
