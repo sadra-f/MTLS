@@ -14,7 +14,6 @@ from clustering.NumberClusterFinder import NumberClusterFinder
 from helpers.distances import *
 from helpers.helpers import *
 
-from models.test import TestClass
 from models.ClusteredData import ClusteredData
 
 from Vector.sentence_bert import sb_vectorizer as sb
@@ -25,6 +24,8 @@ import numpy as np
 import evaluate as eval
 from itertools import combinations
 from transformers import BertTokenizer, BertForNextSentencePrediction
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
 
 READ_DIST_FROM_LOG = True
 READ_SORTED_DIST_FROM_LOG = False
@@ -35,7 +36,7 @@ def main():
     
     # t1 = np.random.random((27000, 400))
     # t2 = np.ones((27000,1))
-    # # t3 = np.ndarray(27000, dtype=tuple)
+    # t3 = np.ndarray(27000, dtype=tuple)
 
     
     # dist_metric = distance_metric(metric_type=type_metric.USER_DEFINED, func=test)
@@ -58,7 +59,6 @@ def main():
     ht_doc_list = DocumentReader(READY_HT_PATH, file_pattern="*.htrs",parent_dir_as_date=True).read_all()
     sent_list = new_extract_sentences(doc_list, ht_doc_list)
     SENTENCE_COUNT = len(sent_list)
-    
     if READ_SB_FROM_LOG:
         sb_result = read_np_array(SENTENCE_BERT_VECTORS_PATH)
     else:
@@ -69,7 +69,7 @@ def main():
         sent_list[i].vector = bert
 
     if not READ_DIST_FROM_LOG:
-        dist = np.full((SENTENCE_COUNT, SENTENCE_COUNT), np.finfo.max)
+        dist = np.full((SENTENCE_COUNT, SENTENCE_COUNT), np.finfo(np.float64).max)
         print(datetime.datetime.now())
         initial_sentence_clusters = ClusteredData(KMeans(sent_list, 10, 1).process().labels)
         for cluster in initial_sentence_clusters.seperated:
@@ -81,24 +81,28 @@ def main():
     else:
         dist = read_np_array(CLUSTER1_DIST_PATH)
     
-    # if READ_SORTED_DIST_FROM_LOG:
-    #     sorted_dist = read_np_array(CLUSTER1_SORTED_DIST_PATH)
-    # else:
-    #     dist.sort(axis=1)
-    #     sorted_dist = np.flip(dist, axis=1)
+   
+
+    for i, vec in enumerate(dist):
+        vec[vec == np.inf] = 100
+        vec[vec < 0] = 0
+        vec[i] = 0
+    # np.sort(dist, axis=1)
+    # sorted_dist = np.flip(dist, axis=1)
     # write_np_array(sorted_dist, CLUSTER1_SORTED_DIST_PATH)
-    
-    # I HAVE NO IDEA WHY I HAVE THIS BIT OF CODE AND WHY I HAVENT DELETED IT
+    nth_dist_sum = 0
+    for i, val in enumerate(dist):
+        nth_dist_sum += float(np.sort(val, axis=0)[DBSCAN_MINPOINT_1])
+    eps = nth_dist_sum / len(dist)
     # for  i in range(len(sorted_dist)):
     #     tmp = sorted_dist[i][1:4]
     #     tmp.append(sorted_dist[i][len(sorted_dist)-4:len(sorted_dist)])
     #     sorted_dist[i] = tmp
-     
 
-    eps = NumberClusterFinder(sb_result)
-    eps.generateDistance()
-    eps.find()
-    clusters = dbscan(dist, eps.eps, DBSCAN_MINPOINT_1)
+    # t = np.mean(np.sort([np.mean(i[1:6]) for i in dist]))
+    # eps = NumberClusterFinder(sb_result)
+    # eps.find()
+    clusters = dbscan(dist, eps, 5)
     
      
     clustered_sentences = cluster_inp_list(sent_list, clusters.labels, clusters.cluster_count)
