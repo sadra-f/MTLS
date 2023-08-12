@@ -65,14 +65,10 @@ def main():
         vec[vec == np.inf] = 100
         vec[vec < 0] = 0
         vec[i] = 0
+        
+    eps = np.sum([float(np.sort(val, axis=0)[DBSCAN_MINPOINT_1]) for val in dist]) / len(dist)
 
-    nth_dist_sum = 0
-    for i, val in enumerate(dist):
-        nth_dist_sum += float(np.sort(val, axis=0)[DBSCAN_MINPOINT_1])
-    eps = nth_dist_sum / len(dist)
-
-
-    clusters = dbscan(dist, eps, 5)
+    clusters = dbscan(dist, eps, DBSCAN_MINPOINT_1)
     
      
     clustered_sentences = cluster_inp_list(sent_list, clusters.labels, clusters.cluster_count)
@@ -99,7 +95,7 @@ def main():
     for j in range(clusters.cluster_count):
         bfnsp_cluster_sentence.append([])
         for i in range(len(clustered_sentences[j])):
-            inputs = tokenizer(clustered_sentences[j][i],cluster_main_phrases[j], return_tensors='pt')
+            inputs = tokenizer(clustered_sentences[j][i], cluster_main_phrases[j], return_tensors='pt')
             labels = torch.LongTensor([0])
             outputs = model(**inputs, labels=labels)
 
