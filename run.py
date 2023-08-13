@@ -6,7 +6,7 @@ from IO.helpers import read_ground_truth
 from IO.Read import read_np_array
 from IO.Write import write_np_array
 
-from clustering.helpers import cluster_inp_list
+from clustering.helpers import cluster_inp_list, dbscan_eps
 from clustering.KMeans_clustering import normal_kmeans, CustomKMeans as KMeans
 from clustering.DBSCAN import dbscan
 from clustering.NumberClusterFinder import NumberClusterFinder
@@ -66,7 +66,7 @@ def main():
         vec[vec < 0] = 0
         vec[i] = 0
         
-    eps = np.sum([float(np.sort(val, axis=0)[DBSCAN_MINPOINT_1]) for val in dist]) / len(dist)
+    eps = dbscan_eps(dist, DBSCAN_MINPOINT_1)
 
     clusters = dbscan(dist, eps, DBSCAN_MINPOINT_1)
     
@@ -104,7 +104,6 @@ def main():
 
     for i in range(clusters.cluster_count):
         bfnsp_cluster_sentence[i] = sorted(bfnsp_cluster_sentence[i], key=lambda x: x[1], reverse=True)
-    print(clustered_sentences)
 
     #build cluster vectors of document percentages
     cluster_vectors = np.zeros((clusters.cluster_count, DOCUMENT_COUNT))
@@ -121,11 +120,8 @@ def main():
             cluster_sim[i][j] = cluster_distance(cluster_vectors[i], sb_result[sent_list.index(bfnsp_cluster_sentence[i][0][0])], cluster_vectors[j], sb_result[sent_list.index(bfnsp_cluster_sentence[j][0][0])])
     
 
-    eps2 = NumberClusterFinder(cluster_sim)
-    eps2.generateDistance()
-    eps2.find()
-    second_clusters2 = dbscan(cluster_sim, eps2.eps, DBSCAN_MINPOINT_2)
-    second_clusters = normal_kmeans(cluster_sim, 2)
+    eps2 = dbscan_eps(cluster_sim, DBSCAN_MINPOINT_2)
+    second_clusters = dbscan(cluster_sim, eps2, DBSCAN_MINPOINT_2)
     
 
     gt = [
