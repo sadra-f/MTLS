@@ -28,7 +28,7 @@ def cosine_distance(vector1:ndarray, vector2:ndarray):
     """
     #to get cosine similarity remove the "1 - ..." or subtract 1 from the result and get the absolute value
     res =  1 - cosine_similarity(vector1, vector2)
-    return res #if res > 0 else 0
+    return res if res > 0 else 0
 
 def cosine_similarity(vector1:ndarray, vector2:ndarray):
     """
