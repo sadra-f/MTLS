@@ -49,9 +49,9 @@ class CustomKMeans:
 
 
     def _run_one_cycle(self):
-        for i in range(self._shape[0]):
-            for j in range(self._shape[1]):
-                self._current_distances[i, j] = self._dist_func(self.data[i], self.centeroids[j])                
+        for i, data in enumerate(self.data):
+            for j, centroid in enumerate(self.centeroids):
+                self._current_distances[i, j] = self._dist_func(data, centroid)                
             self.labels[i] = np.argmax(self._current_distances.take(i, 0))
 
     def _find_new_centroids(self):
@@ -59,7 +59,7 @@ class CustomKMeans:
         pass
 
     def _calc_means(self):
-        pass
+        
 
 
 
