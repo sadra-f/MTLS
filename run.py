@@ -31,7 +31,7 @@ READ_SB_FROM_LOG = True
 
 
 def main():
-    
+    print(datetime.datetime.now())
     doc_list = DocumentReader(DATASET_PATH, parent_dir_as_date=True).read_all()
     DOCUMENT_COUNT = len(doc_list)
     ht_doc_list = DocumentReader(READY_HT_PATH, file_pattern="*.htrs",parent_dir_as_date=True).read_all()
@@ -59,7 +59,6 @@ def main():
     else:
         dist = read_np_array(CLUSTER1_DIST_PATH)
     
-   
 
     for i, vec in enumerate(dist):
         vec[vec == np.inf] = 100
@@ -128,38 +127,31 @@ def main():
         [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L2\\D3\\groundtruth\\g1")],
         [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L2\\D3\\groundtruth\\g2")]
     ]
-    timelines_clusters = []
     timelines_clusters_sentences = []
     for i in range(second_clusters.cluster_count):
-        timelines_clusters.append([])
         timelines_clusters_sentences.append([])
     
 
     for i in range(len(second_clusters.labels)):
-        timelines_clusters[second_clusters.labels[i]].append(i)
         timelines_clusters_sentences[second_clusters.labels[i]].append((bfnsp_cluster_sentence[i][0][0],bfnsp_cluster_sentence[i][0][0].date))
         try:
             timelines_clusters_sentences[second_clusters.labels[i]].append((bfnsp_cluster_sentence[i][1][0],bfnsp_cluster_sentence[i][1][0].date))    
         except:
             continue
+
     rouge = eval.load('rouge')
     # finals = rouge.compute(predictions=[i[0] for i in timelines_clusters_sentences[1]], references=["demonstrators protest in central cairo", "tunisia also lacked the oil resources of other arab states"])
-        
+    evaluations = np.ndarray((second_clusters.cluster_count, len(gt)), dtype=object)
     for i in range(second_clusters.cluster_count):
         for j in range(len(gt)):
             prd = [i[0] for i in timelines_clusters_sentences[i]]
             size = len(prd) if len(prd) < len(gt[j]) else len(gt[j])
-            metrics11 = rouge.compute(predictions=prd[:size], references=gt[j][:size])
-            metrics12 = rouge.compute(predictions=[prd], references=[gt[j]])
-            print(f'generated({i}) GT({j}) ==> ', metrics11)
-            print(f'generated({i}) GT({j}) ==> ', metrics12)
-            try:
-                metrics21 = rouge.compute(predictions=prd[:size], references=gt[j][:size])
-                metrics22 = rouge.compute(predictions=[prd], references=[gt[j]])
-                print(f'generated({i}) GT({j}) ==> ', metrics21)
-                print(f'generated({i}) GT({j}) ==> ', metrics22)
-            except:
-                continue
+            evaluation = rouge.compute(predictions=prd[:size], references=gt[j][:size])
+            evaluations[i][j] = evaluation
+            # metrics12 = rouge.compute(predictions=[prd], references=[gt[j]])
+
+    print(evaluations)
+    print(datetime.datetime.now())
     return
     
 
