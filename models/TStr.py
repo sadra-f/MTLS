@@ -1,4 +1,4 @@
-from datetime import date as Date
+import numpy as np
 
 class TStr(str):
     """
@@ -76,3 +76,6 @@ class TStr(str):
     @vector.getter
     def vector(self):
         return self._vector
+    
+    def _reset_vector(self):
+        self._vector = np.zeros_like(self._vector)
