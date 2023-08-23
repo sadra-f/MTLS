@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, kmeans_plusplus
 
 from pyclustering.cluster.kmeans import kmeans as km
 from pyclustering.utils.metric import distance_metric, type_metric
@@ -28,14 +28,12 @@ def custom_kmeans(input_matrix, initial_centers=None):
 
 
 class CustomKMeans:
-    def __init__(self, data:list[TStr], initial_centers, step_count, distance_function=sentence_distance, label_wrapper=None):
+    def __init__(self, data:list[TStr], K = 10, step_count=20, distance_function=sentence_distance, label_wrapper=None):
         self.data = data
-        if type(initial_centers) is int:
-            self.centeroids = [data[random.randint(0, len(data))] for k in range(initial_centers)]
-        else:
-            self.centeroids = initial_centers
+        self.init_centroids = [[data[value], 0] for i, value in enumerate(kmeans_plusplus(np.array([val.vector for val in data], np.float64), K, n_local_trials=25)[1])]
+        self.centroids = self.init_centroids
         self.step_count = step_count
-        self._shape = (len(data), len(self.centeroids))
+        self._shape = (len(data), len(self.centroids))
         self._current_distances = np.full(self._shape, np.inf)
         self._dist_func = distance_function
 
@@ -50,16 +48,22 @@ class CustomKMeans:
 
     def _run_one_cycle(self):
         for i, data in enumerate(self.data):
-            for j, centroid in enumerate(self.centeroids):
-                self._current_distances[i, j] = self._dist_func(data, centroid)                
-            self.labels[i] = np.argmax(self._current_distances.take(i, 0))
+            for j, centroid in enumerate(self.centroids):
+                self._current_distances[i, j] = self._dist_func(data, centroid[0])                
+            clust_indx = np.argmin(self._current_distances.take(i, 0))
+            self.labels[i] = clust_indx
+            self.centroids[clust_indx][1] += 1
 
     def _find_new_centroids(self):
-        self._calc_means()
-        pass
+        self._set_to_means()
+        for value in self.centroids:
+            value[0].vector = np.divide(value[0].vector, value[1])
+            value[1] = 0
 
-    def _calc_means(self):
-        
+    def _set_to_means(self):
+        for val in self.centroids : val[0]._reset_vector()
+        for i, val in enumerate(self.labels):
+            self.centroids[val][0].vector = np.add(self.centroids[val][0].vector, self.data[i].vector)
 
 
 
