@@ -9,7 +9,6 @@ from IO.Write import write_np_array
 from clustering.helpers import cluster_inp_list, dbscan_eps
 from clustering.KMeans_clustering import normal_kmeans, CustomKMeans as KMeans
 from clustering.DBSCAN import dbscan
-from clustering.NumberClusterFinder import NumberClusterFinder
 
 from helpers.distances import *
 from helpers.helpers import *
@@ -23,9 +22,10 @@ import datetime
 import numpy as np
 import evaluate as eval
 from itertools import combinations
+from matplotlib import pyplot as plt
 from transformers import BertTokenizer, BertForNextSentencePrediction
-
-READ_DIST_FROM_LOG = True
+from sklearn.decomposition import PCA
+READ_DIST_FROM_LOG = False
 READ_SORTED_DIST_FROM_LOG = False
 READ_SB_FROM_LOG = True
 
@@ -49,7 +49,11 @@ def main():
     if not READ_DIST_FROM_LOG:
         dist = np.full((SENTENCE_COUNT, SENTENCE_COUNT), np.finfo(np.float64).max)
         print(datetime.datetime.now())
-        initial_sentence_clusters = ClusteredData(KMeans(sent_list, 10, 1).process().labels)
+        initial_sentence_clusters = ClusteredData(KMeans(sent_list, 10, 3).process().labels)
+        # pt = PCA(2)
+        # t = pt.fit(sb_result)
+        # for i, val in enumerate(initial_sentence_clusters.seperated):
+        #     plt.scatter([t[i][0] for i in val],[t[i][1] for i in val],label=i)
         for cluster in initial_sentence_clusters.seperated:
             print(datetime.datetime.now())
             for j, k in combinations(cluster, 2):
