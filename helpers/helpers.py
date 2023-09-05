@@ -72,6 +72,9 @@ def extract_sentences(doc_list):
 
 
 def new_extract_sentences(doc_list, HT_list):
+    """
+        extracts the sentences and their dates from precomputed heideltime timeml outputs
+    """
     result = []
     for i in range(len(doc_list)):
         for j in range(len(HT_list[i].text)):
