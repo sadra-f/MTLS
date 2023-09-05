@@ -23,10 +23,11 @@ import numpy as np
 import evaluate as eval
 from itertools import combinations
 from matplotlib import pyplot as plt
+from sklearn.decomposition import PCA 
 from transformers import BertTokenizer, BertForNextSentencePrediction
-from sklearn.decomposition import PCA
+
 READ_DIST_FROM_LOG = False
-READ_SORTED_DIST_FROM_LOG = False
+# READ_SORTED_DIST_FROM_LOG = False
 READ_SB_FROM_LOG = True
 
 
@@ -72,7 +73,6 @@ def main():
     eps = dbscan_eps(dist, DBSCAN_MINPOINT_1)
 
     clusters = dbscan(dist, eps, DBSCAN_MINPOINT_1)
-    
      
     clustered_sentences = cluster_inp_list(sent_list, clusters.labels, clusters.cluster_count)
 
