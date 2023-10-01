@@ -12,6 +12,10 @@ import re
 import numpy as np
 
 def sort_dist(dist:list):
+    """
+        sorts a list of distance values
+        previously used
+    """
     res = []
     for i in range(len(dist)):
         res.append(sorted(dist[i]))
@@ -19,6 +23,9 @@ def sort_dist(dist:list):
 
 
 def keyword_extractor(doc:str):
+    """
+        using a bert model (KeyBert) extracts key words/phrases form a document
+    """
     model = KeyBERT()
     return model.extract_keywords(doc, keyphrase_ngram_range=(1,2 if KEYPHRASE else 1), stop_words=STOP_WORDS)
 
