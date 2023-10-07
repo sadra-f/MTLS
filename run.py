@@ -25,8 +25,9 @@ from itertools import combinations
 from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA 
 from transformers import BertTokenizer, BertForNextSentencePrediction
+from models.ClusterDistance import DistanceKmeans
 
-READ_DIST_FROM_LOG = False
+READ_DIST_FROM_LOG = True
 # READ_SORTED_DIST_FROM_LOG = False
 READ_SB_FROM_LOG = True
 
@@ -122,10 +123,14 @@ def main():
         for j in range(len(cluster_vectors)):    
             cluster_sim[i][j] = cluster_distance(cluster_vectors[i], sb_result[sent_list.index(bfnsp_cluster_sentence[i][0][0])], cluster_vectors[j], sb_result[sent_list.index(bfnsp_cluster_sentence[j][0][0])])
     
-
+    # cluster2=[]
+    # for i in range(len(cluster_vectors)):
+    #     clusterkmeans=DistanceKmeans(cluster_vectors[i],sb_result[sent_list.index(bfnsp_cluster_sentence[i][0][0])])
+    #     cluster2.append(clusterkmeans)
+     
     eps2 = dbscan_eps(cluster_sim, DBSCAN_MINPOINT_2)
     second_clusters = dbscan(cluster_sim, eps2, DBSCAN_MINPOINT_2)
-    
+    # second_sentence_clusters = ClusteredData(CustomKMeans2(cluster2, 3, 5).process().labels)
 
     gt = [
         [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L2\\D3\\groundtruth\\g1")],
@@ -148,7 +153,7 @@ def main():
     evaluations = np.ndarray((second_clusters.cluster_count, len(gt)), dtype=object)
     for i in range(second_clusters.cluster_count):
         for j in range(len(gt)):
-            prd = [i[0] for i in timelines_clusters_sentences[i]]
+            prd = [k[0] for k in timelines_clusters_sentences[k]]
             size = len(prd) if len(prd) < len(gt[j]) else len(gt[j])
             evaluation = rouge.compute(predictions=prd[:size], references=gt[j][:size])
             evaluations[i][j] = evaluation
