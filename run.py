@@ -7,14 +7,14 @@ from IO.Read import read_np_array
 from IO.Write import write_np_array
 
 from clustering.helpers import cluster_inp_list, dbscan_eps
-from clustering.KMeans_clustering import normal_kmeans, CustomKMeans as KMeans
+from clustering.KMeans_clustering import normal_kmeans, CustomKMeans as KMeans, CustomKMeans2 as KMeans2
 from clustering.DBSCAN import dbscan
 
 from helpers.distances import *
 from helpers.helpers import *
 
 from models.ClusteredData import ClusteredData
-
+from models.ClusterDistance import DistanceKmeans
 from Vector.sentence_bert import sb_vectorizer as sb
 
 import torch
@@ -121,12 +121,14 @@ def main():
     cluster_sim = np.zeros((len(cluster_vectors), len(cluster_vectors)))
     for i in range(len(cluster_vectors)) :
         for j in range(len(cluster_vectors)):    
-            cluster_sim[i][j] = cluster_distance(cluster_vectors[i], sb_result[sent_list.index(bfnsp_cluster_sentence[i][0][0])], cluster_vectors[j], sb_result[sent_list.index(bfnsp_cluster_sentence[j][0][0])])
-    
+            cluster_sim[i][j] = cluster_distance(cluster_vectors[i], bfnsp_cluster_sentence[i][0][0].vector, cluster_vectors[j], bfnsp_cluster_sentence[j][0][0].vector)
+    clusternig_input = []
+    for i in range(len(cluster_vectors)):
+        clusternig_input.append(DistanceKmeans(cluster_vectors[i], bfnsp_cluster_sentence[i][0][0]))
     # second_clusters = normal_kmeans(cluster_sim, 2)
     eps2 = dbscan_eps(cluster_sim, DBSCAN_MINPOINT_2)
-    second_clusters = dbscan(cluster_sim, eps2, DBSCAN_MINPOINT_2)
-    # second_sentence_clusters = ClusteredData(CustomKMeans2(cluster2, 3, 5).process().labels)
+    # second_clusters = dbscan(cluster_sim, eps2, DBSCAN_MINPOINT_2)
+    second_clusters = ClusteredData(KMeans2(clusternig_input, 3, 5).process().labels)
 
     gt = [
         [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L2\\D3\\groundtruth\\g1")],
@@ -149,9 +151,9 @@ def main():
     evaluations = np.ndarray((second_clusters.cluster_count, len(gt)), dtype=object)
     for i in range(second_clusters.cluster_count):
         for j in range(len(gt)):
-            prd = [k[0] for k in timelines_clusters_sentences[k]]
+            prd = [k[0] for k in timelines_clusters_sentences[i]]
             size = len(prd) if len(prd) < len(gt[j]) else len(gt[j])
-            evaluation = rouge.compute(predictions=' '.join(prd), references=' '.join(gt[j]))
+            evaluation = rouge.compute(predictions=[' '.join(prd)], references=[' '.join(gt[j])])
             evaluations[i][j] = evaluation
             # metrics12 = rouge.compute(predictions=[prd], references=[gt[j]])
 
