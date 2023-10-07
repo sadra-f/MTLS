@@ -123,11 +123,7 @@ def main():
         for j in range(len(cluster_vectors)):    
             cluster_sim[i][j] = cluster_distance(cluster_vectors[i], sb_result[sent_list.index(bfnsp_cluster_sentence[i][0][0])], cluster_vectors[j], sb_result[sent_list.index(bfnsp_cluster_sentence[j][0][0])])
     
-    # cluster2=[]
-    # for i in range(len(cluster_vectors)):
-    #     clusterkmeans=DistanceKmeans(cluster_vectors[i],sb_result[sent_list.index(bfnsp_cluster_sentence[i][0][0])])
-    #     cluster2.append(clusterkmeans)
-     
+    # second_clusters = normal_kmeans(cluster_sim, 2)
     eps2 = dbscan_eps(cluster_sim, DBSCAN_MINPOINT_2)
     second_clusters = dbscan(cluster_sim, eps2, DBSCAN_MINPOINT_2)
     # second_sentence_clusters = ClusteredData(CustomKMeans2(cluster2, 3, 5).process().labels)
@@ -155,7 +151,7 @@ def main():
         for j in range(len(gt)):
             prd = [k[0] for k in timelines_clusters_sentences[k]]
             size = len(prd) if len(prd) < len(gt[j]) else len(gt[j])
-            evaluation = rouge.compute(predictions=prd[:size], references=gt[j][:size])
+            evaluation = rouge.compute(predictions=' '.join(prd), references=' '.join(gt[j]))
             evaluations[i][j] = evaluation
             # metrics12 = rouge.compute(predictions=[prd], references=[gt[j]])
 
