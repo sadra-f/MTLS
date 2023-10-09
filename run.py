@@ -27,9 +27,9 @@ from sklearn.decomposition import PCA
 from transformers import BertTokenizer, BertForNextSentencePrediction
 from models.ClusterDistance import DistanceKmeans
 
-READ_DIST_FROM_LOG = True
+READ_DIST_FROM_LOG = False
 # READ_SORTED_DIST_FROM_LOG = False
-READ_SB_FROM_LOG = True
+READ_SB_FROM_LOG = False
 
 
 def main():
@@ -49,7 +49,7 @@ def main():
         sent_list[i].vector = bert
 
     if not READ_DIST_FROM_LOG:
-        dist = np.full((SENTENCE_COUNT, SENTENCE_COUNT), np.finfo(np.float64).max)
+        dist = np.full((SENTENCE_COUNT, SENTENCE_COUNT), np.finfo(np.float16).max)
         print(datetime.datetime.now())
         initial_sentence_clusters = ClusteredData(KMeans(sent_list, 10, 3).process().labels)
         # pt = PCA(2)
@@ -131,8 +131,11 @@ def main():
     second_clusters = ClusteredData(KMeans2(clusternig_input, 3, 5).process().labels)
 
     gt = [
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L2\\D3\\groundtruth\\g1")],
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L2\\D3\\groundtruth\\g2")]
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g1")],
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g2")],
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g3")],
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g4")],
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g5")],
     ]
     timelines_clusters_sentences = []
     for i in range(second_clusters.cluster_count):
