@@ -49,9 +49,9 @@ def main():
         sent_list[i].vector = bert
 
     if not READ_DIST_FROM_LOG:
-        dist = np.full((SENTENCE_COUNT, SENTENCE_COUNT), np.finfo(np.float16).max)
+        dist = np.full((SENTENCE_COUNT, SENTENCE_COUNT), np.finfo(np.float64).max)
         print(datetime.datetime.now())
-        initial_sentence_clusters = ClusteredData(KMeans(sent_list, 10, 3).process().labels)
+        initial_sentence_clusters = ClusteredData(KMeans(sent_list, 5 * N_TIMELINES, 3).process().labels)
         # pt = PCA(2)
         # t = pt.fit(sb_result)
         # for i, val in enumerate(initial_sentence_clusters.seperated):
@@ -131,11 +131,11 @@ def main():
     second_clusters = ClusteredData(KMeans2(clusternig_input, 3, 5).process().labels)
 
     gt = [
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g1")],
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g2")],
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g3")],
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g4")],
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g5")],
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L3\\D3\\groundtruth\\g1")],
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L3\\D3\\groundtruth\\g2")],
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L3\\D3\\groundtruth\\g3")]
+        # [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g4")],
+        # [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g5")],
     ]
     timelines_clusters_sentences = []
     for i in range(second_clusters.cluster_count):

@@ -7,8 +7,8 @@
 _STR_INPUT_PATH = 'test_io/input.txt'
 _STR_LOG_PATH = 'log/.log'
 
-_STR_DATASET_PATH = 'dataset/mtl_dataset/L5/D3'
-_STR_READY_HT_PATH = 'C:/Users/TOP/Desktop/project/mtl_dataset_HT/mtl_dataset/L5/D3'
+_STR_DATASET_PATH = 'dataset/mtl_dataset/L3/D3'
+_STR_READY_HT_PATH = 'C:/Users/TOP/Desktop/project/mtl_dataset_HT/mtl_dataset/L3/D3'
 
 _STR_SENTENCE_BERT_VECTORS_PATH = 'log/SENTENCE_BERT_VECTORS/sb.npy'
 _STR_SENT_LIST_PATH = 'log/sentences/sentences.npy'
