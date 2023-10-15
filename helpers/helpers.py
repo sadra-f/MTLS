@@ -33,12 +33,7 @@ def keyword_extractor(doc:str):
 def doc_list_keyword_extractor(doc_list:list) -> list[str]:
     res = []
     for cluster_sentence_list in doc_list:
-        #tmp
-        tmp_str = ""
-        for k in cluster_sentence_list:
-            tmp_str += k
-        #/tmp
-        phrase_tuple_list = keyword_extractor(tmp_str)
+        phrase_tuple_list = keyword_extractor(' '.join(cluster_sentence_list))
         res.append([phrase_tuple_list[i][0] for i in range(len(phrase_tuple_list))])
     return res
 
