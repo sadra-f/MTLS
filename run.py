@@ -30,15 +30,15 @@ from models.ClusterDistance import DistanceKmeans
 READ_DIST_FROM_LOG = False
 # READ_SORTED_DIST_FROM_LOG = False
 READ_SB_FROM_LOG = False
-
+LARGE_DIST_VALUE = 100
 
 def main():
-    print(datetime.datetime.now())
+    print('init : ', datetime.datetime.now())
     doc_list = DocumentReader(DATASET_PATH, parent_dir_as_date=True).read_all()
     DOCUMENT_COUNT = len(doc_list)
     ht_doc_list = DocumentReader(READY_HT_PATH, file_pattern="*.htrs",parent_dir_as_date=True).read_all()
     sent_list = new_extract_sentences(doc_list, ht_doc_list)
-    SENTENCE_COUNT = len(sent_list)
+    # SENTENCE_COUNT = len(sent_list)
     if READ_SB_FROM_LOG:
         sb_result = read_np_array(SENTENCE_BERT_VECTORS_PATH)
     else:
@@ -49,33 +49,50 @@ def main():
         sent_list[i].vector = bert
 
     if not READ_DIST_FROM_LOG:
-        dist = np.full((SENTENCE_COUNT, SENTENCE_COUNT), np.finfo(np.float64).max)
-        print(datetime.datetime.now())
-        initial_sentence_clusters = ClusteredData(KMeans(sent_list, 5 * N_TIMELINES, 3).process().labels)
+        init_KM_clusters = ClusteredData(KMeans(sent_list, 5 * N_TIMELINES, 3).process().labels)
+        print('kmeans: ', datetime.datetime.now())
         # pt = PCA(2)
         # t = pt.fit(sb_result)
         # for i, val in enumerate(initial_sentence_clusters.seperated):
         #     plt.scatter([t[i][0] for i in val],[t[i][1] for i in val],label=i)
-        for cluster in initial_sentence_clusters.seperated:
-            print(datetime.datetime.now())
-            for j, k in combinations(cluster, 2):
-                    dist[j][k] = dist[k][j] = sentence_distance(sent_list[j], sent_list[k])
+        init_clustered_sentences = cluster_inp_list(sent_list, init_KM_clusters.labels, init_KM_clusters.cluster_count)
+        
+        dists = np.full((init_KM_clusters.cluster_count,), None, dtype=object)
+        for i, cluster in enumerate(init_clustered_sentences):
+            dists[i] = np.zeros((len(cluster),len(cluster)), dtype=np.float16)
+            for j in range(len(cluster)):
+                for k in range(j, len(cluster), 1):
+                    dists[i][j][k] = dists[i][k][j] = sentence_distance(cluster[j], cluster[k])
+            print('distances: ', datetime.datetime.now())
+
+        # for i, cluster in enumerate(init_KM_clusters.seperated):
+        #     print('distances: ', datetime.datetime.now())
+        #     dists[i] = np.zeros((len(cluster),len(cluster)), dtype=np.float16)
+        #     for j in range (len(cluster)):
+        #         for k in range (len(cluster) - j):
+        #     for j, k in combinations(cluster, 2):
+        #         dists[i][j][k] = dists[i][k][j] = sentence_distance(sent_list[j], sent_list[k])
+                
         # write_np_array(dist, CLUSTER1_DIST_PATH)
 
     else:
-        dist = read_np_array(CLUSTER1_DIST_PATH)
+        dists = read_np_array(CLUSTER1_DIST_PATH)
+        init_KM_clusters = ClusteredData(read_np_array(INIT_CLUSTER_LABELS_PATH))
+        init_clustered_sentences = read_np_array(INIT_CLUSTER_SENT_PATH)
     
 
-    for i, vec in enumerate(dist):
-        vec[vec == np.inf] = 100
-        vec[vec < 0] = 0
-        vec[i] = 0
-        
-    eps = dbscan_eps(dist, DBSCAN_MINPOINT_1)
+    # for i, vec in enumerate(dists):
+    #     vec[vec == np.inf] = LARGE_DIST_VALUE
+    #     vec[vec < 0] = 0
+    #     vec[i] = 0
+    clustered_sentences = []
+    for i in range(init_KM_clusters.cluster_count):
+        # init_clust_sent = [dist[i] for i in cluster_indecies]
+        eps = dbscan_eps(dists[i], DBSCAN_MINPOINT_1)
 
-    clusters = dbscan(dist, eps, DBSCAN_MINPOINT_1)
-     
-    clustered_sentences = cluster_inp_list(sent_list, clusters.labels, clusters.cluster_count)
+        clusters = dbscan(dists[i], eps, DBSCAN_MINPOINT_1)
+        
+        clustered_sentences.extend(cluster_inp_list(init_clustered_sentences[i], clusters.labels, clusters.cluster_count))
 
 
     #hold sentence and bert next sentence probability
@@ -126,16 +143,16 @@ def main():
     for i in range(len(cluster_vectors)):
         clusternig_input.append(DistanceKmeans(cluster_vectors[i], bfnsp_cluster_sentence[i][0][0]))
     # second_clusters = normal_kmeans(cluster_sim, 2)
-    eps2 = dbscan_eps(cluster_sim, DBSCAN_MINPOINT_2)
+    # eps2 = dbscan_eps(cluster_sim, DBSCAN_MINPOINT_2)
     # second_clusters = dbscan(cluster_sim, eps2, DBSCAN_MINPOINT_2)
-    second_clusters = ClusteredData(KMeans2(clusternig_input, 3, 5).process().labels)
+    second_clusters = ClusteredData(KMeans2(clusternig_input, N_TIMELINES, 5).process().labels)
 
     gt = [
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L3\\D3\\groundtruth\\g1")],
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L3\\D3\\groundtruth\\g2")],
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L3\\D3\\groundtruth\\g3")]
-        # [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g4")],
-        # [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g5")],
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g1")],
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g2")],
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g3")],
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g4")],
+        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g5")],
     ]
     timelines_clusters_sentences = []
     for i in range(second_clusters.cluster_count):
