@@ -28,9 +28,7 @@ from transformers import BertTokenizer, BertForNextSentencePrediction
 from models.ClusterDistance import DistanceKmeans
 
 READ_DIST_FROM_LOG = False
-# READ_SORTED_DIST_FROM_LOG = False
 READ_SB_FROM_LOG = False
-LARGE_DIST_VALUE = 100
 
 def main():
     print('init : ', datetime.datetime.now())
@@ -38,7 +36,6 @@ def main():
     DOCUMENT_COUNT = len(doc_list)
     ht_doc_list = DocumentReader(READY_HT_PATH, file_pattern="*.htrs",parent_dir_as_date=True).read_all()
     sent_list = new_extract_sentences(doc_list, ht_doc_list)
-    # SENTENCE_COUNT = len(sent_list)
     if READ_SB_FROM_LOG:
         sb_result = read_np_array(SENTENCE_BERT_VECTORS_PATH)
     else:
@@ -65,33 +62,16 @@ def main():
                     dists[i][j][k] = dists[i][k][j] = sentence_distance(cluster[j], cluster[k])
             print('distances: ', datetime.datetime.now())
 
-        # for i, cluster in enumerate(init_KM_clusters.seperated):
-        #     print('distances: ', datetime.datetime.now())
-        #     dists[i] = np.zeros((len(cluster),len(cluster)), dtype=np.float16)
-        #     for j in range (len(cluster)):
-        #         for k in range (len(cluster) - j):
-        #     for j, k in combinations(cluster, 2):
-        #         dists[i][j][k] = dists[i][k][j] = sentence_distance(sent_list[j], sent_list[k])
-                
-        # write_np_array(dist, CLUSTER1_DIST_PATH)
-
     else:
         dists = read_np_array(CLUSTER1_DIST_PATH)
         init_KM_clusters = ClusteredData(read_np_array(INIT_CLUSTER_LABELS_PATH))
         init_clustered_sentences = read_np_array(INIT_CLUSTER_SENT_PATH)
     
 
-    # for i, vec in enumerate(dists):
-    #     vec[vec == np.inf] = LARGE_DIST_VALUE
-    #     vec[vec < 0] = 0
-    #     vec[i] = 0
     clustered_sentences = []
     for i in range(init_KM_clusters.cluster_count):
-        # init_clust_sent = [dist[i] for i in cluster_indecies]
         eps = dbscan_eps(dists[i], DBSCAN_MINPOINT_1)
-
-        clusters = dbscan(dists[i], eps, DBSCAN_MINPOINT_1)
-        
+        clusters = dbscan(dists[i], eps, DBSCAN_MINPOINT_1)        
         clustered_sentences.extend(cluster_inp_list(init_clustered_sentences[i], clusters.labels, clusters.cluster_count))
 
 
@@ -167,15 +147,12 @@ def main():
             continue
 
     rouge = eval.load('rouge')
-    # finals = rouge.compute(predictions=[i[0] for i in timelines_clusters_sentences[1]], references=["demonstrators protest in central cairo", "tunisia also lacked the oil resources of other arab states"])
     evaluations = np.ndarray((second_clusters.cluster_count, len(gt)), dtype=object)
     for i in range(second_clusters.cluster_count):
         for j in range(len(gt)):
             prd = [k[0] for k in timelines_clusters_sentences[i]]
-            size = len(prd) if len(prd) < len(gt[j]) else len(gt[j])
             evaluation = rouge.compute(predictions=[' '.join(prd)], references=[' '.join(gt[j])])
             evaluations[i][j] = evaluation
-            # metrics12 = rouge.compute(predictions=[prd], references=[gt[j]])
 
     print(evaluations)
     print(datetime.datetime.now())
