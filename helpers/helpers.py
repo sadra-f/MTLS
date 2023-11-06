@@ -31,6 +31,14 @@ def keyword_extractor(doc:str):
 
 
 def doc_list_keyword_extractor(doc_list:list) -> list[str]:
+    """extracts the keywords for the docuemnts/sentences in each of thec clusters/lists in the given list
+
+    Args:
+        doc_list (list): the list of clusters list(list(sentence))
+
+    Returns:
+        list[str]: the key words for each cluster/list list(list(keyword))
+    """
     res = []
     for cluster_sentence_list in doc_list:
         phrase_tuple_list = keyword_extractor(' '.join(cluster_sentence_list))
@@ -38,6 +46,28 @@ def doc_list_keyword_extractor(doc_list:list) -> list[str]:
     return res
 
 def half_matrix_to_full(matrix, dims, diagonal):
+    """Not USED
+            fills a matrix with the values in one diagonal half
+
+            example: 
+                this:
+                [0, 0, 0, 0]
+                [1, 0, 0, 0]
+                [2, 4, 0, 0]
+                [3, 5, 6, 0]
+                
+                trurns into:
+                [0, 1, 2, 3]
+                [1, 0, 4, 5]
+                [2, 4, 0, 6]
+                [3, 5, 6, 0]
+
+
+    Args:
+        matrix (_type_): the matrix to fill
+        dims (_type_): the value for the first dim
+        diagonal (_type_): value for the diagonal line
+    """
     for i in range(dims):
         j = i + 1
         matrix[i][j] = diagonal
@@ -46,6 +76,15 @@ def half_matrix_to_full(matrix, dims, diagonal):
             j+= 1
 
 def check_samepath(filename1, filename2):
+    """checks if two paths are the same
+
+    Args:
+        filename1 (_type_): first path to compare
+        filename2 (_type_): second path to compare
+
+    Returns:
+        _type_: _description_
+    """
     indx1 = re.search("\\\\L\d{1}\\\\", str(filename1))
     indx2 = re.search("\\\\L\d{1}\\\\", str(filename2))
     if filename1[indx1.span()[0]:] == filename2[indx2.span()[0]:]:
@@ -74,8 +113,14 @@ def extract_sentences(doc_list):
 
 
 def new_extract_sentences(doc_list, HT_list):
-    """
-        extracts the sentences and their dates from precomputed heideltime timeml outputs
+    """extracts the sentences and their dates from precomputed heideltime timeml outputs
+
+    Args:
+        doc_list (list): list of the documetns
+        HT_list (list): list of the ht results matching sentences element-wise
+
+    Returns:
+        _type_: list of docuemnts with their dates fixed to them
     """
     result = []
     for i in range(len(doc_list)):
@@ -142,6 +187,15 @@ class Compress:
 
 
     def matrix_compressor(matrix, compress=np.inf):
+        """compresses a martix by compresing each of the vectors in it
+
+        Args:
+            matrix (_type_): the matrix to compress
+            compress (_type_, optional): value to compress based on of which is a lot. Defaults to np.inf.
+
+        Returns:
+            _type_: compressed matrix
+        """
         res = []
         for i , vec in enumerate(matrix):
             res.append(Compress.vector_compressor(vec, compress))
@@ -149,6 +203,16 @@ class Compress:
 
 
     def vector_decompressor(compressed_vector, replace_with=np.inf, final_type=np.float64):
+        """decompresses a vector after it was compressed setting the vlaues where they blong adn with the amount they originally existed
+
+        Args:
+            compressed_vector (_type_): the vector to decompress
+            replace_with (_type_, optional): replace the repeated value with. Defaults to np.inf.
+            final_type (_type_, optional): the data type when returning the decompressed vector. Defaults to np.float64.
+
+        Returns:
+            _type_: the decompressed vector as it first was
+        """
         res = []
         found_mark = False
         for i in range(1, len(compressed_vector)):
@@ -166,6 +230,16 @@ class Compress:
 
 
     def matrix_decompressor(compressed_matrix, replace_with=np.inf, final_type=np.float64):
+        """decompresses a matrix after it was compressed setting the vlaues where they blong and with the amount they originally existed
+
+        Args:
+            compressed_matrix (_type_): the matrix to decompress
+            replace_with (_type_, optional): replace the repeated value with. Defaults to np.inf.
+            final_type (_type_, optional): the data type of values when returning the decompressed matrix. Defaults to np.float64.
+
+        Returns:
+            _type_: the decompressed matrix
+        """
         res = []
         for i, vector in enumerate(compressed_matrix):
             res.append(Compress.vector_decompressor(vector, replace_with, final_type))
