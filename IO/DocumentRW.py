@@ -3,7 +3,12 @@ from pathlib import Path
 from models.Document import Document
 from models.TStr import TStr
 from .helpers import docs_of_pattern
+
 class DocumentReader:
+    """
+        DocumentReader Class used to read the content of a number of files and store the content using Document class objects.
+        specifically used for reading the datasets
+    """
     def __init__(self, path:Path, file_pattern:str="*.txt", parent_dir_as_date:bool=True, recursive:bool=True, to_lower:bool=True):
         self._path = path
         self.parent_as_date = parent_dir_as_date
@@ -40,6 +45,11 @@ class DocumentReader:
                     return Document([TStr(line.lower()) if self.to_lower else TStr(line.lower()) for line in file], path, date=tmp_date if parent_as_date else None)
             
     def read_all(self) -> list[Document]:
+        """Read all documents in the given directory
+
+        Returns:
+            list[Document]: reads through all documents in the given directory and returns their content in a list fo Document objects
+        """
         result = []
         if self._is_file:
             result.append(self._read_file(self.file_path_list[0], self.parent_as_date))
