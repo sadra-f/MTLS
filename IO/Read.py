@@ -1,7 +1,7 @@
 import numpy as np
 from pathlib import Path
 import re
-import datetime
+from datetime import datetime
 def read_np_array(path):
     """Raed a pickled/not pickled file containing the data in an numpy array
 
@@ -14,10 +14,10 @@ def read_np_array(path):
     return np.load(path, allow_pickle=True)
 
 
-def read_all_GTs(dataset_path, N_TIMELINES):
+def read_all_GTs(dataset_path:Path, N_TIMELINES):
     res = []
     for i in range(N_TIMELINES):
-        gt_path = dataset_path + f'groundtruth/g{i+1}'
+        gt_path = dataset_path / 'groundtruth' / f'g{i+1}'
         res.append(read_ground_truth(gt_path))
     return res
 
