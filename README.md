@@ -8,4 +8,4 @@ This MTLS model uses Bert models for text vectorization and text similarity dete
 
 The corpus used is one of news text avilable and linked [here](https://yiyualt.github.io/mtlsdata/).
 
-This projects code is incomplete and has been passed to the masters student to be completed as arranged by my project supervisor.
+This projects code is incomplete and has been passed to the masters student to be completed as arranged by the project supervisor.
