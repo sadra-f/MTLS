@@ -2,8 +2,7 @@ from statics.paths import *
 from statics.config import *
 
 from IO.DocumentRW import DocumentReader
-from IO.helpers import read_ground_truth
-from IO.Read import read_np_array
+from IO.Read import read_np_array, read_all_GTs
 from IO.Write import write_np_array
 
 from clustering.helpers import cluster_inp_list, dbscan_eps
@@ -122,18 +121,13 @@ def main():
     clusternig_input = []
     for i in range(len(cluster_vectors)):
         clusternig_input.append(DistanceKmeans(cluster_vectors[i], bfnsp_cluster_sentence[i][0][0]))
+        
     # second_clusters = normal_kmeans(cluster_sim, 2)
     # eps2 = dbscan_eps(cluster_sim, DBSCAN_MINPOINT_2)
     # second_clusters = dbscan(cluster_sim, eps2, DBSCAN_MINPOINT_2)
     second_clusters = ClusteredData(KMeans2(clusternig_input, N_TIMELINES, 5).process().labels)
 
-    gt = [
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g1")],
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g2")],
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g3")],
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g4")],
-        [i[1] for i in read_ground_truth("C:\\Users\\TOP\\Desktop\\project\\mtl_dataset\\mtl_dataset\\L5\\D3\\groundtruth\\g5")],
-    ]
+    gt = read_all_GTs(DATASET_PATH, N_TIMELINES)
     timelines_clusters_sentences = []
     for i in range(second_clusters.cluster_count):
         timelines_clusters_sentences.append([])
