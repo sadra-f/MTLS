@@ -1,6 +1,20 @@
 import numpy as np
+
 class ClusteredData:
-     def __init__(self, labels, do_count_members=False, seperate=True):
+    """
+        A class that holds the clutersing labels and meta data on the result of clustering algorithms.
+        Takes the labels list as input and calculates several other values using the labels list.
+
+        Fields:
+            labels: The labels from the result of the clustering
+            has_outlier: True if there is an outlier with -1 value, false otherwise
+            clusters: The values by which the clusters are represented e.g [0, 1, 2, 3]
+            cluster_count: The number of clusters
+            outlier_count: The number of outlier values in the result of clustering 
+            cluster_memeber_count: The number of memebrs for each cluster e.g [10, 23, 8, 3, 20]
+            seperated: Seperated labels by cluster into seperate lists each for a cluster
+    """
+    def __init__(self, labels, do_count_members=False, seperate=True):
         self.labels = labels
         try:
             min_cluster = labels.min()
