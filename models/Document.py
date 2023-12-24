@@ -4,6 +4,9 @@ from models.TStr import TStr
 
 
 class Document:
+    """Document class that holds information of each read text doc while containing the textual content
+
+    """
     id_counter = 0
 
     def __init__(self, text:list[TStr], path:(str|Path), date:Date=None) -> None:
@@ -40,6 +43,7 @@ class Document:
 
     @property
     def date(self):
+        """Field Used to set the date of the document after it has been calculated"""
         return self._date
     
     @date.setter
