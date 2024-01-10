@@ -17,7 +17,7 @@ def read_np_array(path):
 def read_all_GTs(dataset_path:Path, N_TIMELINES):
     res = []
     for i in range(N_TIMELINES):
-        gt_path = dataset_path / 'groundtruth' / f'g{i+1}'
+        gt_path = dataset_path / 'groundtruth' / f'g{i+1 if N_TIMELINES > 1 else ""}'
         res.append(read_ground_truth(gt_path))
     return res
 
