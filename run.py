@@ -19,9 +19,6 @@ import torch
 import datetime
 import numpy as np
 import evaluate as eval
-from itertools import combinations
-from matplotlib import pyplot as plt
-from sklearn.decomposition import PCA 
 from transformers import BertTokenizer, BertForNextSentencePrediction
 
 READ_DIST_FROM_LOG = False
@@ -46,10 +43,7 @@ def main():
     if not READ_DIST_FROM_LOG:
         init_KM_clusters = ClusteredData(KMeans(sent_list, 5 * N_TIMELINES, 3).process().labels)
         print('kmeans: ', datetime.datetime.now())
-        # pt = PCA(2)
-        # t = pt.fit(sb_result)
-        # for i, val in enumerate(initial_sentence_clusters.seperated):
-        #     plt.scatter([t[i][0] for i in val],[t[i][1] for i in val],label=i)
+
         init_clustered_sentences = cluster_inp_list(sent_list, init_KM_clusters.labels, init_KM_clusters.cluster_count)
         
         dists = np.full((init_KM_clusters.cluster_count,), None, dtype=object)
@@ -83,7 +77,6 @@ def main():
     # keybert key phrase finder
     cluster_main_phrases = doc_list_kewords_sentence(clustered_sentences)
 
-    #   ***ALL OK ABOVE***
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     model = BertForNextSentencePrediction.from_pretrained('bert-base-uncased')
     for j in range(FIRST_CLUSTER_COUNT):
@@ -112,13 +105,7 @@ def main():
     for i in range(len(cluster_vectors)) :
         for j in range(len(cluster_vectors)):    
             cluster_sim[i][j] = cluster_distance(cluster_vectors[i], bfnsp_cluster_sentence[i][0][0].vector, cluster_vectors[j], bfnsp_cluster_sentence[j][0][0].vector)
-    # clusternig_input = []
-    # for i in range(len(cluster_vectors)):
-    #     clusternig_input.append(DistanceKmeans(cluster_vectors[i], bfnsp_cluster_sentence[i][0][0]))
 
-    # second_clusters = normal_kmeans(cluster_sim, 2)
-    # eps2 = dbscan_eps(cluster_sim, DBSCAN_MINPOINT_2)
-    # second_clusters = dbscan(cluster_sim, eps2, DBSCAN_MINPOINT_2)
     second_clusters = normal_kmeans(cluster_sim, N_TIMELINES)
 
     gt = read_all_GTs(DATASET_PATH, N_TIMELINES)
