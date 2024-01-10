@@ -39,11 +39,15 @@ def doc_list_keyword_extractor(doc_list:list) -> list[str]:
     Returns:
         list[str]: the key words for each cluster/list list(list(keyword))
     """
-    res = []
-    for cluster_sentence_list in doc_list:
-        phrase_tuple_list = keyword_extractor(' '.join(cluster_sentence_list))
-        res.append([phrase[0] for phrase in phrase_tuple_list])
-    return res
+    return keyword_extractor([' '.join(docs) for docs in doc_list])
+
+def doc_list_kewords_sentence(doc_list:list) -> list[str]:
+    keywords = doc_list_keyword_extractor(doc_list)
+    for i in range(len(keywords)):
+        keywords[i] = ' '.join([keyword[0] for keyword in keywords[i]])
+    
+    return keywords
+
 
 def half_matrix_to_full(matrix, dims, diagonal):
     """Not USED
