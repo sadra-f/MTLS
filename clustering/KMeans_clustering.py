@@ -10,7 +10,6 @@ from models.ClusteredData import ClusteredData
 
 from helpers.distances import sentence_distance
 from helpers.distances import cluster_distance
-from models.ClusterDistance import DistanceKmeans
 
 def normal_kmeans(vectorized_data, n_clusters):
     """
@@ -21,7 +20,7 @@ def normal_kmeans(vectorized_data, n_clusters):
 
         returns: clustered data labels and more using the ClusteredData class
     """
-    res =  KMeans(n_clusters, n_init=80).fit(vectorized_data)
+    res =  KMeans(n_clusters, init='k-means++').fit(vectorized_data)
     return ClusteredData(res.labels_)
 
 def custom_kmeans(input_matrix, initial_centers=None):
@@ -105,72 +104,5 @@ class CustomKMeans:
             calculates the sum of the vectors in each cluster
         """
         for val in self.centroids : val[0]._reset_vector()
-        for i, val in enumerate(self.labels):
-            self.centroids[val][0].vector = np.add(self.centroids[val][0].vector, self.data[i].vector)
-
-
-
-
- 
-class CustomKMeans2:
-    """
-        Custom implementation of Kmeans Algorithm so required distance function can be used
-        uses kemans++ to find inital centers
-
-
-        data: the vector list to run the kmeans algorithm over
-        k: the number of centroids to run the kmeans algorithm with
-        step_count: the number of times to run the kmeans algorithm
-        distance_function: the distance function to use to calculate the distance of the given points
-    """
-    def __init__(self, data:list[DistanceKmeans], K = 10, step_count=20, distance_function=cluster_distance):
-        self.data = data
-        self.init_centroids = [[data[value], 0] for i, value in enumerate(kmeans_plusplus(np.array([val.vector for val in data], np.float64), K, n_local_trials=25)[1])]
-        self.centroids = self.init_centroids
-        self.step_count = step_count
-        self._shape = (len(data), len(self.centroids))
-        self._current_distances = np.full(self._shape, np.inf)
-        self._dist_func = distance_function
-
-        self.labels = np.full(len(data), -1)
-    
-    def process(self):
-        """
-            runs the kmeans algorithm on the dataset and returns self object to read the data from i.e (labels)
-
-            returns: self
-        """
-        for i in range(self.step_count):
-            self._run_one_cycle()
-            self._find_new_centroids()
-        return self
-
-
-    def _run_one_cycle(self):
-        """
-            runs one cycle of kmeans algorithm calculates distances between 
-            centroids and points and appoints each point to a cluster(centroid)
-        """
-        for i, data in enumerate(self.data):
-            for j, centroid in enumerate(self.centroids):
-                self._current_distances[i, j] = self._dist_func(data.vector,data.examplar_sen.vector,centroid[0].vector,centroid[0].examplar_sen.vector)                
-            clust_indx = np.argmin(self._current_distances.take(i, 0))
-            self.labels[i] = clust_indx
-            self.centroids[clust_indx][1] += 1
-
-    def _find_new_centroids(self):
-        """
-            finds the mean point in each cluster and sets it as the new centroid
-        """
-        self._set_to_sums()
-        for value in self.centroids:
-            value[0].vector = np.divide(value[0].vector, value[1])
-            value[1] = 0
-
-    def _set_to_sums(self):
-        """
-            calculates the sum of the vectors in each cluster
-        """
-        for val in self.centroids : val[0].vector = np.zeros_like(val[0].vector)
         for i, val in enumerate(self.labels):
             self.centroids[val][0].vector = np.add(self.centroids[val][0].vector, self.data[i].vector)
