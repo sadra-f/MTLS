@@ -1,5 +1,5 @@
 from statics.stop_words import STOP_WORDS
-from statics.config import KEYPHRASE
+from statics.config import KEYPHRASE, N_REPRESENTING_PHRASES
 from statics.config import DO_EXEC_LOG
 
 from helpers.DateParser import DateParser as DP
@@ -27,7 +27,7 @@ def keyword_extractor(doc:str):
         using a bert model (KeyBert) extracts key words/phrases form a document
     """
     model = KeyBERT()
-    return model.extract_keywords(doc, keyphrase_ngram_range=(1,2 if KEYPHRASE else 1), stop_words=STOP_WORDS)
+    return model.extract_keywords(doc, keyphrase_ngram_range=(1,2 if KEYPHRASE else 1), stop_words=STOP_WORDS, top_n=N_REPRESENTING_PHRASES)
 
 
 def doc_list_keyword_extractor(doc_list:list) -> list[str]:
@@ -42,7 +42,7 @@ def doc_list_keyword_extractor(doc_list:list) -> list[str]:
     res = []
     for cluster_sentence_list in doc_list:
         phrase_tuple_list = keyword_extractor(' '.join(cluster_sentence_list))
-        res.append([phrase_tuple_list[i][0] for i in range(len(phrase_tuple_list))])
+        res.append([phrase[0] for phrase in phrase_tuple_list])
     return res
 
 def half_matrix_to_full(matrix, dims, diagonal):
