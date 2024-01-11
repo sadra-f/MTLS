@@ -8,8 +8,7 @@ from pyclustering.utils.metric import distance_metric, type_metric
 from models.TStr import TStr
 from models.ClusteredData import ClusteredData
 
-from helpers.distances import sentence_distance
-from helpers.distances import cluster_distance
+from helpers.distances import sentence_distance, cluster_distance
 
 def normal_kmeans(vectorized_data, n_clusters):
     """
@@ -57,7 +56,8 @@ class CustomKMeans:
     """
     def __init__(self, data:list[TStr], K = 10, step_count=20, distance_function=sentence_distance):
         self.data = data
-        self.init_centroids = [[data[value], 0] for i, value in enumerate(kmeans_plusplus(np.array([val.vector for val in data], np.float64), K, n_local_trials=25)[1])]
+        self.K = K
+        self.init_centroids = self._find_init_centroids(np.array([val.vector for val in data], np.float64))
         self.centroids = self.init_centroids
         self.step_count = step_count
         self._shape = (len(data), len(self.centroids))
@@ -106,3 +106,6 @@ class CustomKMeans:
         for val in self.centroids : val[0]._reset_vector()
         for i, val in enumerate(self.labels):
             self.centroids[val][0].vector = np.add(self.centroids[val][0].vector, self.data[i].vector)
+
+    def _find_init_centroids(self, data):
+        return [[data[value], 0] for i, value in enumerate(kmeans_plusplus(data, self.K, n_local_trials=25)[1])]
