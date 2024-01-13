@@ -3,6 +3,8 @@ from statics.config import MTLS_DISTANCE_CONST, TIME_DISTANCE_CONST, CLUSTER_DIS
 import numpy as np
 from numpy import ndarray, dot
 from models.TStr import TStr
+from models.DXCV import DocumentxClusterVector as DXCV 
+
 
 def date_day_diff(date1:date, date2:date):
     """
@@ -43,11 +45,15 @@ def _sentence_distance(vector1:ndarray, date1:date, vector2:ndarray, date2:date)
     return MTLS_DISTANCE_CONST * normalized_date_diff(date1, date2) + (1 - MTLS_DISTANCE_CONST) * cosine_distance(vector1, vector2)
 
 
-def cluster_distance(cluster_vector_1:ndarray, sent1, cluster_vector_2:ndarray, sent2):
+def _cluster_distance(cluster_vector_1:ndarray, sent1, cluster_vector_2:ndarray, sent2):
     """
         returns the distance between document vector of two clusters and the vector for the representing sentence of the cluster (float)
     """
     return CLUSTER_DISTANCE_CONST * cosine_distance(sent1, sent2) + (1 - CLUSTER_DISTANCE_CONST) * cosine_distance(cluster_vector_1, cluster_vector_2)
+
+def cluster_distance(dxcv1:DXCV, dxcv2:DXCV):
+    return _cluster_distance(dxcv1.doc_cluster_vector, dxcv1.rep_sent_vector, dxcv2.doc_cluster_vector, dxcv2.rep_sent_vector)
+
 
 def sentence_distance(sentence_data_1, sentence_data_2):
     """
