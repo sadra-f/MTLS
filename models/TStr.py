@@ -79,3 +79,11 @@ class TStr(str):
     
     def _reset_vector(self):
         self._vector = np.zeros_like(self._vector)
+
+    def _copy(self):
+        res = TStr(self)
+        res.date = self._date
+        res.doc_path = self._doc_path
+        res.doc_id = self._doc_id
+        res.vector = self._vector
+        return res
