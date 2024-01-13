@@ -20,6 +20,8 @@ _STR_CLUSTER1_DIST_PATH = 'log/dist1/dist1.npy'
 _STR_CLUSTER1_SORTED_DIST_PATH = 'log/sorted_dist1/sortd_dist1.npy'
 _STR_CLUSTER1_RES_PATH = 'log/cluster1_res/cluster1.npy'
 
+_STR_BFNSP_RES_PATH = 'log/bfnsp/bfnsp.npy'
+
 _STR_CLUSTER2_DIST_PATH = 'log/dist2/'
 _STR_CLUSTER2_RES_PATH = 'log/cluster2_res/cluster2.npy'
 #====================================================================================
@@ -42,6 +44,7 @@ CLUSTER1_DIST_PATH = Path (_STR_CLUSTER1_DIST_PATH)
 CLUSTER1_RES_PATH = Path (_STR_CLUSTER1_RES_PATH)
 CLUSTER1_SORTED_DIST_PATH = Path (_STR_CLUSTER1_SORTED_DIST_PATH)
 
+BFNSP_RES_PATH = Path(_STR_BFNSP_RES_PATH)
 
 CLUSTER2_DIST_PATH = Path (_STR_CLUSTER2_DIST_PATH)
 CLUSTER2_RES_PATH = Path(_STR_CLUSTER2_RES_PATH)
