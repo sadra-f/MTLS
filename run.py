@@ -98,7 +98,6 @@ def main():
         bfnsp_cluster_sentence = read_np_array(BFNSP_RES_PATH).tolist()
 
     #build cluster vectors of document percentages
-    # cluster_vectors = np.zeros((FIRST_CLUSTER_COUNT, DOCUMENT_COUNT))
     cluster_vectors = np.full((FIRST_CLUSTER_COUNT, ), None, object)
     
 
@@ -107,10 +106,6 @@ def main():
         for j in range(len(clustered_sentences[i])):
             cluster_vectors[i].doc_cluster_vector[clustered_sentences[i][j].doc_id] += 1
 
-    # cluster_sim = np.zeros((len(cluster_vectors), len(cluster_vectors)))
-    # for i in range(len(cluster_vectors)) :
-    #     for j in range(len(cluster_vectors)):    
-    #         cluster_sim[i][j] = cluster_distance(cluster_vectors[i], bfnsp_cluster_sentence[i][0][0].vector, cluster_vectors[j], bfnsp_cluster_sentence[j][0][0].vector)
 
     second_clusters = ClusteredData(AKMeans(cluster_vectors, N_TIMELINES, 5).process().labels)
 
