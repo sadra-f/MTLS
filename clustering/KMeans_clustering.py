@@ -6,6 +6,7 @@ from pyclustering.cluster.kmeans import kmeans as km
 from pyclustering.utils.metric import distance_metric, type_metric
 
 from models.TStr import TStr
+from models.DXCV import DocumentxClusterVector as DXCV
 from models.ClusteredData import ClusteredData
 
 from helpers.distances import sentence_distance, cluster_distance
@@ -57,13 +58,12 @@ class CustomKMeans:
     def __init__(self, data:list[TStr], K = 10, step_count=20, distance_function=sentence_distance):
         self.data = data
         self.K = K
-        self.init_centroids = self._find_init_centroids(np.array([val.vector for val in data], np.float64))
+        self.init_centroids = self._find_init_centroids(data)
         self.centroids = self.init_centroids
         self.step_count = step_count
         self._shape = (len(data), len(self.centroids))
         self._current_distances = np.full(self._shape, np.inf)
         self._dist_func = distance_function
-
         self.labels = np.full(len(data), -1)
     
     def process(self):
@@ -108,4 +108,31 @@ class CustomKMeans:
             self.centroids[val][0].vector = np.add(self.centroids[val][0].vector, self.data[i].vector)
 
     def _find_init_centroids(self, data):
-        return [[data[value], 0] for i, value in enumerate(kmeans_plusplus(data, self.K, n_local_trials=25)[1])]
+        return [[data[value]._copy(), 0] for i, value in 
+                enumerate(kmeans_plusplus(np.array([val.vector for val in data]), self.K, n_local_trials=25)[1])]
+    
+
+
+
+class AltCustomKMeans(CustomKMeans):
+    def __init__(self, data:list[DXCV], K = 10, step_count=20, distance_function=cluster_distance):
+        super().__init__(data, K, step_count, distance_function)
+    
+    def _find_new_centroids(self):
+        self._set_to_sums()
+        for value in self.centroids:
+            value[0].doc_cluster_vector = np.divide(value[0].doc_cluster_vector, value[1])
+            value[0].rep_sent_vector = np.divide(value[0].rep_sent_vector, value[1])
+            value[1] = 0
+
+
+    def _set_to_sums(self):
+        for val in self.centroids : val[0]._reset_vector()
+        for i, val in enumerate(self.labels):
+            self.centroids[val][0].doc_cluster_vector = np.add(self.centroids[val][0].doc_cluster_vector, self.data[i].doc_cluster_vector)
+            self.centroids[val][0].rep_sent_vector = np.add(self.centroids[val][0].rep_sent_vector, self.data[i].rep_sent_vector)
+
+
+    def _find_init_centroids(self, data):
+        return [[data[value]._copy(), 0] for i, value in 
+                enumerate(kmeans_plusplus(np.array([val.doc_cluster_vector for val in data]), self.K, n_local_trials=25)[1])]
