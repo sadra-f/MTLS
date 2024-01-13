@@ -6,13 +6,14 @@ from IO.Read import read_np_array, read_all_GTs
 from IO.Write import write_np_array
 
 from clustering.helpers import cluster_inp_list, dbscan_eps
-from clustering.KMeans_clustering import normal_kmeans, CustomKMeans as KMeans
+from clustering.KMeans_clustering import normal_kmeans, CustomKMeans as KMeans, AltCustomKMeans as AKMeans
 from clustering.DBSCAN import dbscan
 
 from helpers.distances import *
 from helpers.helpers import *
 
 from models.ClusteredData import ClusteredData
+from models.DXCV import DocumentxClusterVector as DXCV
 from Vector.sentence_bert import sb_vectorizer as sb
 
 import torch
@@ -23,6 +24,7 @@ from transformers import BertTokenizer, BertForNextSentencePrediction
 
 READ_DIST_FROM_LOG = False
 READ_SB_FROM_LOG = False
+READ_BFNSP_FROM_LOG = False
 
 def main():
     print('init : ', datetime.datetime.now())
@@ -41,7 +43,7 @@ def main():
         sent_list[i].vector = bert
 
     if not READ_DIST_FROM_LOG:
-        init_KM_clusters = ClusteredData(KMeans(sent_list, 5 * N_TIMELINES, 3).process().labels)
+        init_KM_clusters = ClusteredData(KMeans(sent_list, INITIAL_KMEANS_TIMLINE_MULTIPLIER * N_TIMELINES, 3).process().labels)
         print('kmeans: ', datetime.datetime.now())
 
         init_clustered_sentences = cluster_inp_list(sent_list, init_KM_clusters.labels, init_KM_clusters.cluster_count)
@@ -71,42 +73,46 @@ def main():
         clustered_sentences.extend(cluster_inp_list(init_clustered_sentences[i], clusters.labels, clusters.cluster_count))
     
     FIRST_CLUSTER_COUNT = len(clustered_sentences)
+
     #hold sentence and bert next sentence probability
     bfnsp_cluster_sentence = []
-    
-    # keybert key phrase finder
-    cluster_main_phrases = doc_list_kewords_sentence(clustered_sentences)
+    if not READ_BFNSP_FROM_LOG:
+        # keybert key phrase finder
+        cluster_main_phrases = doc_list_kewords_sentence(clustered_sentences)
 
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    model = BertForNextSentencePrediction.from_pretrained('bert-base-uncased')
-    for j in range(FIRST_CLUSTER_COUNT):
-        bfnsp_cluster_sentence.append([])
-        for i in range(len(clustered_sentences[j])):
-            inputs = tokenizer(clustered_sentences[j][i], cluster_main_phrases[j], return_tensors='pt')
-            labels = torch.LongTensor([0])
-            outputs = model(**inputs, labels=labels)
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        model = BertForNextSentencePrediction.from_pretrained('bert-base-uncased')
+        for j in range(FIRST_CLUSTER_COUNT):
+            bfnsp_cluster_sentence.append([])
+            for i in range(len(clustered_sentences[j])):
+                inputs = tokenizer(clustered_sentences[j][i], cluster_main_phrases[j], return_tensors='pt')
+                labels = torch.LongTensor([0])
+                outputs = model(**inputs, labels=labels)
 
-            bfnsp_cluster_sentence[j].append((clustered_sentences[j][i], outputs.logits[0][0].item()))
-    
+                bfnsp_cluster_sentence[j].append((clustered_sentences[j][i], outputs.logits[0][0].item()))
+        
 
-    for i in range(FIRST_CLUSTER_COUNT):
-        bfnsp_cluster_sentence[i] = sorted(bfnsp_cluster_sentence[i], key=lambda x: x[1], reverse=True)
+        for i in range(FIRST_CLUSTER_COUNT):
+            bfnsp_cluster_sentence[i] = sorted(bfnsp_cluster_sentence[i], key=lambda x: x[1], reverse=True)
+    else:
+        bfnsp_cluster_sentence = read_np_array(BFNSP_RES_PATH).tolist()
 
     #build cluster vectors of document percentages
-    cluster_vectors = np.zeros((FIRST_CLUSTER_COUNT, DOCUMENT_COUNT))
+    # cluster_vectors = np.zeros((FIRST_CLUSTER_COUNT, DOCUMENT_COUNT))
+    cluster_vectors = np.full((FIRST_CLUSTER_COUNT, ), None, object)
     
 
     for i in range(FIRST_CLUSTER_COUNT):
+        cluster_vectors[i] = DXCV(np.zeros((DOCUMENT_COUNT,)), bfnsp_cluster_sentence[i][0][0].vector)
         for j in range(len(clustered_sentences[i])):
-            cluster_vectors[i][clustered_sentences[i][j].doc_id] += 1
-      
+            cluster_vectors[i].doc_cluster_vector[clustered_sentences[i][j].doc_id] += 1
 
-    cluster_sim = np.zeros((len(cluster_vectors), len(cluster_vectors)))
-    for i in range(len(cluster_vectors)) :
-        for j in range(len(cluster_vectors)):    
-            cluster_sim[i][j] = cluster_distance(cluster_vectors[i], bfnsp_cluster_sentence[i][0][0].vector, cluster_vectors[j], bfnsp_cluster_sentence[j][0][0].vector)
+    # cluster_sim = np.zeros((len(cluster_vectors), len(cluster_vectors)))
+    # for i in range(len(cluster_vectors)) :
+    #     for j in range(len(cluster_vectors)):    
+    #         cluster_sim[i][j] = cluster_distance(cluster_vectors[i], bfnsp_cluster_sentence[i][0][0].vector, cluster_vectors[j], bfnsp_cluster_sentence[j][0][0].vector)
 
-    second_clusters = normal_kmeans(cluster_sim, N_TIMELINES)
+    second_clusters = ClusteredData(AKMeans(cluster_vectors, N_TIMELINES, 5).process().labels)
 
     gt = read_all_GTs(DATASET_PATH, N_TIMELINES)
     # temp
@@ -114,10 +120,8 @@ def main():
         for j in range(len(gt[i])):
             gt[i][j] = gt[i][j][1]
     # end-temp
-    timelines_clusters_sentences = []
-    for i in range(second_clusters.cluster_count):
-        timelines_clusters_sentences.append([])
-    
+            
+    timelines_clusters_sentences = [ [] for i in range(second_clusters.cluster_count)]
 
     for i in range(len(second_clusters.labels)):
         timelines_clusters_sentences[second_clusters.labels[i]].append((bfnsp_cluster_sentence[i][0][0],bfnsp_cluster_sentence[i][0][0].date))
