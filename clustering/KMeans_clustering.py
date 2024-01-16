@@ -117,6 +117,7 @@ class CustomKMeans:
 class AltCustomKMeans(CustomKMeans):
     def __init__(self, data:list[DXCV], K = 10, step_count=20, distance_function=cluster_distance):
         super().__init__(data, K, step_count, distance_function)
+        self.data = data
     
     def _find_new_centroids(self):
         self._set_to_sums()
