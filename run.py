@@ -22,9 +22,9 @@ import numpy as np
 import evaluate as eval
 from transformers import BertTokenizer, BertForNextSentencePrediction
 
-READ_DIST_FROM_LOG = False
-READ_SB_FROM_LOG = False
-READ_BFNSP_FROM_LOG = False
+READ_DIST_FROM_LOG = True
+READ_SB_FROM_LOG = True
+READ_BFNSP_FROM_LOG = True
 
 def main():
     print('init : ', datetime.datetime.now())
@@ -43,7 +43,7 @@ def main():
         sent_list[i].vector = bert
 
     if not READ_DIST_FROM_LOG:
-        init_KM_clusters = ClusteredData(KMeans(sent_list, INITIAL_KMEANS_TIMLINE_MULTIPLIER * N_TIMELINES, 3).process().labels)
+        init_KM_clusters = ClusteredData(KMeans(sent_list, INITIAL_KMEANS_TIMLINE_MULTIPLIER * N_TIMELINES, 5).process().labels)
         print('kmeans: ', datetime.datetime.now())
 
         init_clustered_sentences = cluster_inp_list(sent_list, init_KM_clusters.labels, init_KM_clusters.cluster_count)
@@ -85,15 +85,18 @@ def main():
         for j in range(FIRST_CLUSTER_COUNT):
             bfnsp_cluster_sentence.append([])
             for i in range(len(clustered_sentences[j])):
-                inputs = tokenizer(clustered_sentences[j][i], cluster_main_phrases[j], return_tensors='pt')
-                labels = torch.LongTensor([0])
-                outputs = model(**inputs, labels=labels)
+                try:    
+                    inputs = tokenizer(clustered_sentences[j][i], cluster_main_phrases[j], return_tensors='pt')
+                    labels = torch.LongTensor([0])
+                    outputs = model(**inputs, labels=labels)
+                except:
+                    bfnsp_cluster_sentence[j].append((clustered_sentences[j][i], -10))
 
                 bfnsp_cluster_sentence[j].append((clustered_sentences[j][i], outputs.logits[0][0].item()))
-        
 
-        for i in range(FIRST_CLUSTER_COUNT):
-            bfnsp_cluster_sentence[i] = sorted(bfnsp_cluster_sentence[i], key=lambda x: x[1], reverse=True)
+            bfnsp_cluster_sentence[j] = sorted(bfnsp_cluster_sentence[i], key=lambda x: x[1], reverse=True)
+        
+        write_np_array(bfnsp_cluster_sentence, BFNSP_RES_PATH)
     else:
         bfnsp_cluster_sentence = read_np_array(BFNSP_RES_PATH).tolist()
 
@@ -141,3 +144,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+
+    
