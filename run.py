@@ -22,9 +22,9 @@ import numpy as np
 import evaluate as eval
 from transformers import BertTokenizer, BertForNextSentencePrediction
 
-READ_DIST_FROM_LOG = True
-READ_SB_FROM_LOG = True
-READ_BFNSP_FROM_LOG = True
+READ_DIST_FROM_LOG = False
+READ_SB_FROM_LOG = False
+READ_BFNSP_FROM_LOG = False
 
 def main():
     print('init : ', datetime.datetime.now())
@@ -94,7 +94,7 @@ def main():
 
                 bfnsp_cluster_sentence[j].append((clustered_sentences[j][i], outputs.logits[0][0].item()))
 
-            bfnsp_cluster_sentence[j] = sorted(bfnsp_cluster_sentence[i], key=lambda x: x[1], reverse=True)
+            bfnsp_cluster_sentence[j] = sorted(bfnsp_cluster_sentence[j], key=lambda x: x[0], reverse=True)
         
         write_np_array(bfnsp_cluster_sentence, BFNSP_RES_PATH)
     else:
@@ -138,6 +138,8 @@ def main():
 
     print(evaluations)
     print(datetime.datetime.now())
+    with open(f'../Results/L{N_TIMELINES}D{DATASET_NUMBER}.txt', 'a') as f:
+        print(f'{evaluations}', file=f)
     return
     
 
