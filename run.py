@@ -94,7 +94,7 @@ def main():
 
                 bfnsp_cluster_sentence[j].append((clustered_sentences[j][i], outputs.logits[0][0].item()))
 
-            bfnsp_cluster_sentence[j] = sorted(bfnsp_cluster_sentence[j], key=lambda x: x[0], reverse=True)
+            bfnsp_cluster_sentence[j] = sorted(bfnsp_cluster_sentence[j], key=lambda x: x[1], reverse=True)
         
         write_np_array(bfnsp_cluster_sentence, BFNSP_RES_PATH)
     else:
