@@ -263,5 +263,11 @@ def main_phrase_counter(lst):
     counts = []
     for i, val in enumerate(set(stemmed)):
         counts.append([stemmed.count(val), val])
-    sorted(list(counts), key= lambda x : x[0], reverse=True)
-    return
+    return sorted(list(counts), key= lambda x : x[0], reverse=True)[0:30]
+
+
+def clust_subj_vec(mainPhrases, subj_list):
+    vector = np.ndarray((len(subj_list),))
+    for i, val in enumerate(subj_list):
+        vector[i] = len(re.findall(f"{val[1]}.?", mainPhrases))
+    return vector
