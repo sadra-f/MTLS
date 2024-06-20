@@ -2,7 +2,8 @@ import numpy as np
 from pathlib import Path
 import re
 from datetime import datetime
-def read_np_array(path):
+from IO.helpers import join_paths
+def read_np_array(path, L, D):
     """Raed a pickled/not pickled file containing the data in an numpy array
 
     Args:
@@ -11,7 +12,7 @@ def read_np_array(path):
     Returns:
         ndarray: the numpy array which was saved into the given file
     """
-    return np.load(path, allow_pickle=True)
+    return np.load(join_paths(path, L, D, ".npy"), allow_pickle=True)
 
 
 def read_all_GTs(dataset_path:Path, N_TIMELINES):
