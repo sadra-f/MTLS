@@ -48,3 +48,8 @@ def print_1d_array(arr,location):
             print(file=file)
             
 
+
+
+def join_paths(dir:Path, L, D, fex):
+    dir.cwd().joinpath(f"L{L}D{D}.{fex}")
+    return dir
