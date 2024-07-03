@@ -263,7 +263,7 @@ def main_phrase_counter(lst):
     counts = []
     for i, val in enumerate(set(stemmed)):
         counts.append([stemmed.count(val), val])
-    return sorted(list(counts), key= lambda x : x[0], reverse=True)[0:30]
+    return sorted(list(counts), key= lambda x : x[0], reverse=True)
 
 
 def clust_subj_vec(mainPhrases, subj_list):
