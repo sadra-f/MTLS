@@ -31,15 +31,15 @@ READ_DIST_FROM_LOG = False
 READ_BFNSP_FROM_LOG = False
 
 def main():
-    # with open(f"C:/Users/TOP/Desktop/New folder/{N_TIMELINES}_{DATASET_NUMBER}.txt", "w+") as f:
-    #     pass
     print('init : ', datetime.datetime.now())
+
     doc_list = DocumentReader(DATASET_PATH, parent_dir_as_date=True).read_all()
-    # with open(f"C:/Users/TOP/Desktop/New folder/{len(doc_list)} documents.txt", "w+") as f:
-    #     pass
     DOCUMENT_COUNT = len(doc_list)
+
     ht_doc_list = DocumentReader(READY_HT_PATH, file_pattern="*.htrs",parent_dir_as_date=True).read_all()
+
     sent_list = new_extract_sentences(doc_list, ht_doc_list)
+    
     if READ_SB_FROM_LOG:
         sb_result = read_np_array(SENTENCE_BERT_VECTORS_PATH, N_TIMELINES, DATASET_NUMBER)
     else:
@@ -58,7 +58,6 @@ def main():
 
         init_clustered_sentences = cluster_inp_list(sent_list, init_KM_clusters.labels, init_KM_clusters.cluster_count)
 
-        # p2a(init_clustered_sentences, "C:/Users/TOP/Desktop/New folder/KM_sentences.txt")
 
         dists = np.full((init_KM_clusters.cluster_count,), None, dtype=object)
         for i, cluster in enumerate(init_clustered_sentences):
@@ -84,7 +83,6 @@ def main():
         clusters = dbscan(dists[i], eps, DBSCAN_MINPOINT_1)        
         clustered_sentences.extend(cluster_inp_list(init_clustered_sentences[i], clusters.labels, clusters.cluster_count))
     
-    # p2a(clustered_sentences, "C:/Users/TOP/Desktop/New folder/dbscan_sentences.txt")
     FIRST_CLUSTER_COUNT = len(clustered_sentences)
     print("Event Count : ", FIRST_CLUSTER_COUNT)
 
@@ -111,7 +109,7 @@ def main():
                 cleaned_events.append(event)
         clustered_sentences = cleaned_events
         FIRST_CLUSTER_COUNT = len(clustered_sentences)
-        # p1a(cluster_main_phrases, "C:/Users/TOP/Desktop/New folder/dbscan_cluster_main_phrases.txt")
+
         for j in range(FIRST_CLUSTER_COUNT):
             bfnsp_cluster_sentence.append([])
             for i in range(len(clustered_sentences[j])):
@@ -156,12 +154,6 @@ def main():
 
     for i in range(len(second_clusters.labels)):
         timelines_clusters_sentences[second_clusters.labels[i]].append((bfnsp_cluster_sentence[i][0][0],bfnsp_cluster_sentence[i][0][0].date))
-        # try:
-        #     timelines_clusters_sentences[second_clusters.labels[i]].append((bfnsp_cluster_sentence[i][1][0],bfnsp_cluster_sentence[i][1][0].date))    
-        # except:
-        #     continue
-
-    # p2a(timelines_clusters_sentences, "C:/Users/TOP/Desktop/New folder/timeline_sentences.txt")
 
     rouge = eval.load('rouge')
     evaluations = np.ndarray((second_clusters.cluster_count, len(gt)), dtype=object)
