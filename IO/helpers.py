@@ -51,5 +51,4 @@ def print_1d_array(arr,location):
 
 
 def join_paths(dir:Path, L, D, fex):
-    dir.cwd().joinpath(f"L{L}D{D}.{fex}")
-    return dir
+    return Path(str(dir.absolute()) + f"\\L{L}D{D}.{fex}")

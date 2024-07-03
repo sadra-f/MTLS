@@ -16,7 +16,7 @@ _STR_SENT_HT_LIST_PATH = 'log/sentences/sentences_HT.npy'
 
 _STR_INIT_CLUSTER_LABELS_PATH = 'log/initclusterlabel/'
 _STR_INIT_CLUSTER_SENT_PATH = 'log/initclustersents/'
-_STR_CLUSTER1_DIST_PATH = 'log/dist1/'
+_STR_CLUSTER1_DIST_PATH = 'D:/programing/log_data/bach_prj/dist1/'
 _STR_CLUSTER1_SORTED_DIST_PATH = 'log/sorted_dist1/sortd_dist1.npy'
 _STR_CLUSTER1_RES_PATH = 'log/cluster1_res/cluster1.npy'
 

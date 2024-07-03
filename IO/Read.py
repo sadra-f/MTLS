@@ -12,7 +12,7 @@ def read_np_array(path, L, D):
     Returns:
         ndarray: the numpy array which was saved into the given file
     """
-    return np.load(join_paths(path, L, D, ".npy"), allow_pickle=True)
+    return np.load(join_paths(path, L, D, "npy"), allow_pickle=True)
 
 
 def read_all_GTs(dataset_path:Path, N_TIMELINES):

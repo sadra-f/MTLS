@@ -10,4 +10,4 @@ def write_np_array(arr, path, L, D):
         arr (ndarray): the numpy array to be written
         path (Path|str): the path into which ti write the array
     """
-    np.save(join_paths(path, L , D, ".npy"), arr, allow_pickle=True)
+    np.save(join_paths(path, L , D, "npy"), arr, allow_pickle=True)
