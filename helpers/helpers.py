@@ -3,7 +3,10 @@ from statics.config import KEYPHRASE, N_REPRESENTING_PHRASES
 from statics.config import DO_EXEC_LOG
 
 from helpers.DateParser import DateParser as DP
-
+#..........
+from nltk.stem import SnowballStemmer as SS
+import datetime
+#..........
 from TimeTagger.HeidelTime_Generator import ht
 
 import xml.etree.ElementTree as ET
@@ -248,3 +251,23 @@ class Compress:
         for i, vector in enumerate(compressed_matrix):
             res.append(Compress.vector_decompressor(vector, replace_with, final_type))
         return np.array(res, dtype=final_type)
+    
+
+    
+def main_phrase_counter(lst):
+    stemmed = []
+    stmr = SS("english")
+    for phrase in lst:
+        for word in phrase.split():
+            stemmed.append(stmr.stem(word))
+    counts = []
+    for i, val in enumerate(set(stemmed)):
+        counts.append([stemmed.count(val), val])
+    return sorted(list(counts), key= lambda x : x[0], reverse=True)
+
+
+def clust_subj_vec(mainPhrases, subj_list):
+    vector = np.ndarray((len(subj_list),))
+    for i, val in enumerate(subj_list):
+        vector[i] = len(re.findall(f"{val[1]}.?", mainPhrases))
+    return vector

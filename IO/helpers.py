@@ -23,3 +23,32 @@ def docs_of_pattern(dir:Path, pattern="*.txt", recursive=True):
         except StopIteration:   
             break
     return (result, counter)
+
+
+
+def print_2d_array(arr,location):
+    with open(location, "w+") as file:
+        for i, val in enumerate(arr):
+            print(f"cluster {i}", file=file)
+            for j, valj in enumerate(val):
+                print(valj, end=' ', file=file)
+                try:
+                    print(valj.date, file=file)
+                except:
+                    print(file=file)
+
+            print(file=file)
+            print(file=file)
+
+def print_1d_array(arr,location):
+    with open(location, "w+") as file:
+        for i, val in enumerate(arr):
+            print(f"cluster {i}", file=file)
+            print(val, file=file)
+            print(file=file)
+            
+
+
+
+def join_paths(dir:Path, L, D, fex):
+    return Path(str(dir.absolute()) + f"\\L{L}D{D}.{fex}")

@@ -10,17 +10,17 @@ _STR_LOG_PATH = 'log/.log'
 _STR_DATASET_PATH = f'dataset/mtl_dataset/L{N_TIMELINES}/D{DATASET_NUMBER}'
 _STR_READY_HT_PATH = f'../../mtl_dataset_HT/mtl_dataset/L{N_TIMELINES}/D{DATASET_NUMBER}'
 
-_STR_SENTENCE_BERT_VECTORS_PATH = 'log/SENTENCE_BERT_VECTORS/sb.npy'
+_STR_SENTENCE_BERT_VECTORS_PATH = 'log/SENTENCE_BERT_VECTORS/'
 _STR_SENT_LIST_PATH = 'log/sentences/sentences.npy'
 _STR_SENT_HT_LIST_PATH = 'log/sentences/sentences_HT.npy'
 
-_STR_INIT_CLUSTER_LABELS_PATH = 'log/initclusterlabel/init_labels.npy'
-_STR_INIT_CLUSTER_SENT_PATH = 'log/initclustersents/init_sentences.npy'
-_STR_CLUSTER1_DIST_PATH = 'log/dist1/dist1.npy'
+_STR_INIT_CLUSTER_LABELS_PATH = 'log/initclusterlabel/'
+_STR_INIT_CLUSTER_SENT_PATH = 'log/initclustersents/'
+_STR_CLUSTER1_DIST_PATH = 'D:/programing/log_data/bach_prj/dist1/'
 _STR_CLUSTER1_SORTED_DIST_PATH = 'log/sorted_dist1/sortd_dist1.npy'
 _STR_CLUSTER1_RES_PATH = 'log/cluster1_res/cluster1.npy'
 
-_STR_BFNSP_RES_PATH = 'log/bfnsp/bfnsp.npy'
+_STR_BFNSP_RES_PATH = 'log/bfnsp/'
 
 _STR_CLUSTER2_DIST_PATH = 'log/dist2/'
 _STR_CLUSTER2_RES_PATH = 'log/cluster2_res/cluster2.npy'
