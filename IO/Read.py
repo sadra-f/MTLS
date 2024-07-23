@@ -3,6 +3,8 @@ from pathlib import Path
 import re
 from datetime import datetime
 from IO.helpers import join_paths
+from models.TStr import TStr
+
 def read_np_array(path, L, D):
     """Raed a pickled/not pickled file containing the data in an numpy array
 
@@ -40,7 +42,9 @@ def read_ground_truth(dir:Path): # returns a list of date,text tuples
     text = ""
     for line in gt_text :
         if re.search("^-+$", line) is not None:
-            res.append((date, text))
+            txt = TStr(text)
+            txt.date = date
+            res.append(txt)
             date = None
             text = ""
             continue
