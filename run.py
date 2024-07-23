@@ -23,12 +23,20 @@ from Vector.sentence_bert import sb_vectorizer as sb
 import torch
 import datetime
 import numpy as np
-import evaluate as eval
 from transformers import BertTokenizer, BertForNextSentencePrediction
 
-READ_SB_FROM_LOG = False
-READ_DIST_FROM_LOG = False
+from Evaluation.Concat import concat_rouge
+from Evaluation.Align_m1 import align_m1_rouge
+from Evaluation.DSelect import calculate_d_select
+from itertools import chain
+
+READ_SB_FROM_LOG = True
+READ_DIST_FROM_LOG = True
 READ_BFNSP_FROM_LOG = False
+
+# READ_TIMELINES = False
+
+DO_SAVE_RESULTS = False
 
 def main():
     print('init : ', datetime.datetime.now())
@@ -45,7 +53,7 @@ def main():
     else:
         sb_result = sb(sent_list)
         write_np_array(sb_result, SENTENCE_BERT_VECTORS_PATH, N_TIMELINES, DATASET_NUMBER)
-    
+    #TODO : add ground truth sentence berts together with the main sentences and then assign the sb for each sentence accordingly
     for i, bert in enumerate(sb_result):
         sent_list[i].id = i
         sent_list[i].vector = bert
@@ -100,12 +108,17 @@ def main():
 
         cleaned_events = []
         counts = []
+
+        cleanup_value = CLEANUP_PERCENTAGE * (FIRST_CLUSTER_COUNT / 100)
+        cleanup_value = 1 if cleanup_value < 1 else cleanup_value
+        cleanup_value = CLEANUP_CONST if cleanup_value > CLEANUP_CONST else cleanup_value
+        cleanup_value = 13
         for i, event in enumerate(clustered_sentences):
             count = 0
             for subj in subjs:
                 count += len(re.findall(f"{subj[1]}", " ".join(event)))
             counts.append(count)
-            if count >= 13 :
+            if count >= cleanup_value:
                 cleaned_events.append(event)
         clustered_sentences = cleaned_events
         FIRST_CLUSTER_COUNT = len(clustered_sentences)
@@ -125,13 +138,12 @@ def main():
             bfnsp_cluster_sentence[j] = sorted(bfnsp_cluster_sentence[j], key=lambda x: x[1], reverse=True)
         
         write_np_array(bfnsp_cluster_sentence, BFNSP_RES_PATH, N_TIMELINES, DATASET_NUMBER)
+        write_np_array(clustered_sentences, CLUSTER1_CLEAN_SENTENCES_PATH, N_TIMELINES, DATASET_NUMBER)
     else:
         bfnsp_cluster_sentence = read_np_array(BFNSP_RES_PATH, N_TIMELINES, DATASET_NUMBER).tolist()
+        clustered_sentences = read_np_array(CLUSTER1_CLEAN_SENTENCES_PATH, N_TIMELINES, DATASET_NUMBER).tolist()
 
-
-    #clean from the unrelevant events
-    # for 
-
+    FIRST_CLUSTER_COUNT = len(bfnsp_cluster_sentence)
     #build cluster vectors of document percentages
     cluster_vectors = np.full((FIRST_CLUSTER_COUNT, ), None, object)
 
@@ -144,34 +156,41 @@ def main():
     second_clusters = ClusteredData(AKMeans(cluster_vectors, N_TIMELINES, 5).process().labels)
 
     gt = read_all_GTs(DATASET_PATH, N_TIMELINES)
-    # temp
-    for i in range(len(gt)):
-        for j in range(len(gt[i])):
-            gt[i][j] = gt[i][j][1]
-    # end-temp
-            
+    # gt_sb = sb(chain.from_iterable(gt))
+    # k = 0
+    # for i,val1 in enumerate(gt):
+    #     for j, val2 in enumerate(val1):
+    #         gt[i][j].vector = gt_sb[k]
+    #         k += 1
     timelines_clusters_sentences = [ [] for i in range(second_clusters.cluster_count)]
 
     for i in range(len(second_clusters.labels)):
-        timelines_clusters_sentences[second_clusters.labels[i]].append((bfnsp_cluster_sentence[i][0][0],bfnsp_cluster_sentence[i][0][0].date))
+        timelines_clusters_sentences[second_clusters.labels[i]].append(bfnsp_cluster_sentence[i][0][0])#,bfnsp_cluster_sentence[i][0][0].date))
 
-    rouge = eval.load('rouge')
-    evaluations = np.ndarray((second_clusters.cluster_count, len(gt)), dtype=object)
-    for i in range(second_clusters.cluster_count):
-        for j in range(len(gt)):
-            prd = [k[0] for k in timelines_clusters_sentences[i]]
-            evaluation = rouge.compute(predictions=[' '.join(prd)], references=[' '.join(gt[j])])
-            evaluations[i][j] = evaluation
 
-    print(evaluations)
+    evaluations_concat = concat_rouge(timelines_clusters_sentences, gt)
+    evaluations_alignm1 = align_m1_rouge(timelines_clusters_sentences, gt)
+    evaluations_d_select = calculate_d_select(timelines_clusters_sentences, gt)
+
+    print(evaluations_concat)
+    print(evaluations_alignm1)
+    print(evaluations_d_select)
     print(datetime.datetime.now())
-    with open(f'../Results/L{N_TIMELINES}D{DATASET_NUMBER}.txt', 'w') as f:
-        print(f'{evaluations}', file=f)
-    with open(f'../Result_timelines/L{N_TIMELINES}D{DATASET_NUMBER}.txt', 'w') as f:
-        for i in timelines_clusters_sentences:
-            for j in i:
-                print(f'{j[0]} ==> ({j[1]})', file=f)
-            print("\r\n", file=f)
+    if DO_SAVE_RESULTS:
+        with open(f'../Results/concat/L{N_TIMELINES}D{DATASET_NUMBER}.txt', 'w') as f:
+            print(f'{evaluations_concat}', file=f)
+
+        with open(f'../Results/alignm1/L{N_TIMELINES}D{DATASET_NUMBER}.txt', 'w') as f:
+            print(f'{evaluations_alignm1}', file=f)
+
+        with open(f'../Results/dselect/L{N_TIMELINES}D{DATASET_NUMBER}.txt', 'w') as f:
+            print(f'{evaluations_d_select}', file=f)
+
+        with open(f'../Result_timelines/L{N_TIMELINES}D{DATASET_NUMBER}.txt', 'w') as f:
+            for i in timelines_clusters_sentences:
+                for j in i:
+                    print(f'{j[0]} ==> ({j[1]})', file=f)
+                print("\r\n", file=f)
     return
     
 
