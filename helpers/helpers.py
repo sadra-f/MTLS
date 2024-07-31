@@ -3,6 +3,7 @@ from statics.config import KEYPHRASE, N_REPRESENTING_PHRASES
 from statics.config import DO_EXEC_LOG
 
 from helpers.DateParser import DateParser as DP
+from models.TStr import TStr
 #..........
 from nltk.stem import SnowballStemmer as SS
 import datetime
@@ -11,8 +12,8 @@ from TimeTagger.HeidelTime_Generator import ht
 
 import xml.etree.ElementTree as ET
 from keybert import KeyBERT
-import re
 import numpy as np
+import re
 
 def sort_dist(dist:list):
     """
@@ -271,3 +272,21 @@ def clust_subj_vec(mainPhrases, subj_list):
     for i, val in enumerate(subj_list):
         vector[i] = len(re.findall(f"{val[1]}.?", mainPhrases))
     return vector
+
+
+def concat_one_by_date(timeline:list[TStr]):
+    dates = []
+    res = dict()
+    for val in timeline:
+        if val.date in res.keys():
+            res[val.date] = TStr(res[val.date] + val)
+        else:
+            res[val.date] = TStr(val)
+        res[val.date].date = val.date
+    return list(res.values())
+
+def cancat_by_date(timelines:list[list[TStr]]):
+    res = []
+    for i, tl in enumerate(timelines):
+        res.append(concat_one_by_date(tl))
+    return res
