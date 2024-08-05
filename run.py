@@ -6,7 +6,7 @@ from IO.Read import read_np_array, read_all_GTs
 from IO.Write import write_np_array
 #........
 # from IO.helpers import print_2d_array as p2a, print_1d_array as p1a
-from helpers.helpers import main_phrase_counter as mpc, clust_subj_vec as clsv
+from helpers.helpers import main_phrase_counter as mpc, clust_subj_vec as clsv, cancat_by_date as cbd
 from nltk.stem import SnowballStemmer
 #.......
 from clustering.helpers import cluster_inp_list, dbscan_eps
@@ -32,7 +32,7 @@ from itertools import chain
 
 READ_SB_FROM_LOG = True
 READ_DIST_FROM_LOG = True
-READ_BFNSP_FROM_LOG = False
+READ_BFNSP_FROM_LOG = True
 
 # READ_TIMELINES = False
 
@@ -47,16 +47,29 @@ def main():
     ht_doc_list = DocumentReader(READY_HT_PATH, file_pattern="*.htrs",parent_dir_as_date=True).read_all()
 
     sent_list = new_extract_sentences(doc_list, ht_doc_list)
-    
+    gt = read_all_GTs(DATASET_PATH, N_TIMELINES)
+
     if READ_SB_FROM_LOG:
         sb_result = read_np_array(SENTENCE_BERT_VECTORS_PATH, N_TIMELINES, DATASET_NUMBER)
+        gt_sb_result = read_np_array(GT_SENTENCE_BERT_VECTORS_PATH, N_TIMELINES, DATASET_NUMBER)
     else:
-        sb_result = sb(sent_list)
+        non_gt_count = len(sent_list)
+        all_sents = sent_list + list(chain.from_iterable(gt))
+        all_sb_res = sb(all_sents)
+        sb_result = all_sb_res[:non_gt_count]
+        gt_sb_result = all_sb_res[non_gt_count:]
         write_np_array(sb_result, SENTENCE_BERT_VECTORS_PATH, N_TIMELINES, DATASET_NUMBER)
-    #TODO : add ground truth sentence berts together with the main sentences and then assign the sb for each sentence accordingly
+        write_np_array(gt_sb_result, GT_SENTENCE_BERT_VECTORS_PATH, N_TIMELINES, DATASET_NUMBER)
+    
     for i, bert in enumerate(sb_result):
         sent_list[i].id = i
         sent_list[i].vector = bert
+    cntr = 0
+    for i, clus in enumerate(gt):
+        for j, str in enumerate(clus):
+            gt[i][j].vector = gt_sb_result[cntr]
+            cntr +=1
+
     # remove duplicate strings and reorder
     sent_list = sorted(list(set(sent_list)), key= lambda x: x.id)
     
@@ -112,7 +125,6 @@ def main():
         cleanup_value = CLEANUP_PERCENTAGE * (FIRST_CLUSTER_COUNT / 100)
         cleanup_value = 1 if cleanup_value < 1 else cleanup_value
         cleanup_value = CLEANUP_CONST if cleanup_value > CLEANUP_CONST else cleanup_value
-        cleanup_value = 13
         for i, event in enumerate(clustered_sentences):
             count = 0
             for subj in subjs:
@@ -155,21 +167,13 @@ def main():
 
     second_clusters = ClusteredData(AKMeans(cluster_vectors, N_TIMELINES, 5).process().labels)
 
-    gt = read_all_GTs(DATASET_PATH, N_TIMELINES)
-    # gt_sb = sb(chain.from_iterable(gt))
-    # k = 0
-    # for i,val1 in enumerate(gt):
-    #     for j, val2 in enumerate(val1):
-    #         gt[i][j].vector = gt_sb[k]
-    #         k += 1
     timelines_clusters_sentences = [ [] for i in range(second_clusters.cluster_count)]
 
     for i in range(len(second_clusters.labels)):
-        timelines_clusters_sentences[second_clusters.labels[i]].append(bfnsp_cluster_sentence[i][0][0])#,bfnsp_cluster_sentence[i][0][0].date))
-
+        timelines_clusters_sentences[second_clusters.labels[i]].append(bfnsp_cluster_sentence[i][0][0])
 
     evaluations_concat = concat_rouge(timelines_clusters_sentences, gt)
-    evaluations_alignm1 = align_m1_rouge(timelines_clusters_sentences, gt)
+    evaluations_alignm1 = align_m1_rouge(cbd(timelines_clusters_sentences), cbd(gt))
     evaluations_d_select = calculate_d_select(timelines_clusters_sentences, gt)
 
     print(evaluations_concat)
