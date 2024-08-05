@@ -5,6 +5,17 @@ from models.TStr import TStr
 from datetime import datetime
 
 
+def temporal_weight(d_diff, date_weight):
+    if date_weight == 'linear':
+        return 1 / (d_diff + 1)
+    elif date_weight == 'inverse':
+        return 1 / (d_diff + 1)
+    else:
+        raise ValueError("Unsupported date_weight value. Use 'linear' or 'inverse'.")
+    
+def date_difference(d1, d2):
+    return abs((d1 - d2).days)
+
 def calculate_d_select(predictions:list[TStr], gts:list[TStr], date_weight='linear'):
     """
     Calculate the d-Select metric for two sets of sentences and dates.
@@ -14,17 +25,7 @@ def calculate_d_select(predictions:list[TStr], gts:list[TStr], date_weight='line
     :param date_weight: Weighting scheme for date differences. Options: 'linear', 'inverse'.
     :return: d-Select score
     """
-    
-    def date_difference(d1, d2):
-        return abs((d1 - d2).days)
-    
-    def temporal_weight(d_diff):
-        if date_weight == 'linear':
-            return 1 / (d_diff + 1)
-        elif date_weight == 'inverse':
-            return 1 / (d_diff + 1)
-        else:
-            raise ValueError("Unsupported date_weight value. Use 'linear' or 'inverse'.")
+      
     res = []
     for i, prd in enumerate(predictions):
         for j, gt in enumerate(gts):
@@ -40,7 +41,7 @@ def calculate_d_select(predictions:list[TStr], gts:list[TStr], date_weight='line
                 best_match = None
                 best_weight = -1
                 for ds in all_dates_S:
-                    t_weight = temporal_weight(date_difference(dr, ds))
+                    t_weight = temporal_weight(date_difference(dr, ds), date_weight)
                     if t_weight > best_weight:
                         best_match = ds
                         best_weight = t_weight
@@ -51,7 +52,7 @@ def calculate_d_select(predictions:list[TStr], gts:list[TStr], date_weight='line
             d_select_score = 0
             for dr, ds in aligned_dates:
                 sim_score = cosine_similarity(R[dr][1], S[ds][1])
-                t_weight = temporal_weight(date_difference(dr, ds))
+                t_weight = temporal_weight(date_difference(dr, ds, date_weight))
                 d_select_score += t_weight * sim_score
             
             # Normalize the score by the number of ground truth dates
