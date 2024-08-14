@@ -5,7 +5,7 @@ from models.TStr import TStr
 from datetime import datetime
 
 
-def temporal_weight(d_diff, date_weight):
+def temporal_weight(d_diff, date_weight = "linear"):
     if date_weight == 'linear':
         return 1 / (d_diff + 1)
     elif date_weight == 'inverse':
@@ -52,7 +52,7 @@ def calculate_d_select(predictions:list[TStr], gts:list[TStr], date_weight='line
             d_select_score = 0
             for dr, ds in aligned_dates:
                 sim_score = cosine_similarity(R[dr][1], S[ds][1])
-                t_weight = temporal_weight(date_difference(dr, ds, date_weight))
+                t_weight = temporal_weight(date_difference(dr, ds))
                 d_select_score += t_weight * sim_score
             
             # Normalize the score by the number of ground truth dates
