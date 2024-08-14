@@ -30,13 +30,13 @@ from Evaluation.Align_m1 import align_m1_rouge
 from Evaluation.DSelect import calculate_d_select
 from itertools import chain
 
-READ_SB_FROM_LOG = True
-READ_DIST_FROM_LOG = True
-READ_BFNSP_FROM_LOG = True
+READ_SB_FROM_LOG = False
+READ_DIST_FROM_LOG = False
+READ_BFNSP_FROM_LOG = False
 
 # READ_TIMELINES = False
 
-DO_SAVE_RESULTS = False
+DO_SAVE_RESULTS = True
 
 def main():
     print('init : ', datetime.datetime.now())
