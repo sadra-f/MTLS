@@ -36,7 +36,7 @@ def align_m1_rouge(predictions: list[list[TStr]], gts: list[list[TStr]]) -> floa
                     date_dist = _date_distance(pred_summary.date, gt_summary.date.date())
                     temporal_weight = 1 / (date_dist + 1)
                     content_similarity1 = _rouge_n(pred_summary, gt_summary, 1)
-                    content_similarity2 = _rouge_n(pred_summary, gt_summary, 1)
+                    content_similarity2 = _rouge_n(pred_summary, gt_summary, 2)
                     alignment_score1 = temporal_weight * content_similarity1
                     alignment_score2 = temporal_weight * content_similarity2
                     best_score1 = max(best_score1, alignment_score1)
